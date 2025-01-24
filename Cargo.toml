@@ -1,0 +1,15 @@
+[package]
+name = "bluesky-sentinel"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ratatui = { version = "0.29.0", features = ["crossterm"] }
+rand = "0.8.5"
+clap = { version = "4.5.27", features = ["derive"] }
+scylla = { git = "https://github.com/scylladb/scylla-rust-driver" }
+anyhow = "1.0.95"
+tokio = { version = "1.43.0", features = ["full"] }
+uuid = { version = "1.12.1", features = ["v4"] }
+futures = "0.3.31"
+crossterm = { version = "0.28.1", features = ["event-stream"] }
