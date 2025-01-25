@@ -1,83 +1,15 @@
 {
   "tables": {
-    "characters": {
-      "fields": [
-        [
-          "leveling_state",
-          "leveling",
-          false
-        ],
-        [
-          "name",
-          "text",
-          false
-        ],
-        [
-          "user_did",
-          "text",
-          false
-        ]
-      ],
-      "field_names": [
-        "leveling_state",
-        "user_did",
-        "name"
-      ],
-      "types_by_name": {
-        "leveling_state": "leveling",
-        "name": "text",
-        "user_did": "text"
-      },
-      "type_name": "",
-      "table_name": "",
-      "base_table": "",
-      "partition_keys": [
-        "user_did"
-      ],
-      "clustering_keys": [],
-      "static_columns": [],
-      "global_secondary_indexes": [],
-      "local_secondary_indexes": [],
-      "table_options": null
-    },
-    "characters_experience": {
-      "fields": [
-        [
-          "current_experience",
-          "counter",
-          false
-        ],
-        [
-          "user_did",
-          "text",
-          false
-        ]
-      ],
-      "field_names": [
-        "current_experience",
-        "user_did"
-      ],
-      "types_by_name": {
-        "current_experience": "counter",
-        "user_did": "text"
-      },
-      "type_name": "",
-      "table_name": "",
-      "base_table": "",
-      "partition_keys": [
-        "user_did"
-      ],
-      "clustering_keys": [],
-      "static_columns": [],
-      "global_secondary_indexes": [],
-      "local_secondary_indexes": [],
-      "table_options": null
-    },
     "events": {
       "fields": [
         [
           "event_at",
           "timestamp",
+          false
+        ],
+        [
+          "event_commit_type",
+          "text",
           false
         ],
         [
@@ -107,20 +39,22 @@
         ]
       ],
       "field_names": [
-        "user_did",
+        "event_commit_type",
         "event_data",
-        "event_at",
-        "event_type",
+        "event_id",
         "leveling_state",
-        "event_id"
+        "event_type",
+        "user_did",
+        "event_at"
       ],
       "types_by_name": {
         "event_at": "timestamp",
-        "event_id": "text",
-        "user_did": "text",
         "event_data": "frozen<map<text, text>>",
-        "event_type": "text",
-        "leveling_state": "leveling"
+        "event_commit_type": "text",
+        "leveling_state": "leveling",
+        "user_did": "text",
+        "event_id": "text",
+        "event_type": "text"
       },
       "type_name": "",
       "table_name": "",
@@ -131,6 +65,79 @@
       "clustering_keys": [
         "event_at"
       ],
+      "static_columns": [],
+      "global_secondary_indexes": [],
+      "local_secondary_indexes": [],
+      "table_options": null
+    },
+    "characters_experience": {
+      "fields": [
+        [
+          "current_experience",
+          "counter",
+          false
+        ],
+        [
+          "user_did",
+          "text",
+          false
+        ]
+      ],
+      "field_names": [
+        "current_experience",
+        "user_did"
+      ],
+      "types_by_name": {
+        "user_did": "text",
+        "current_experience": "counter"
+      },
+      "type_name": "",
+      "table_name": "",
+      "base_table": "",
+      "partition_keys": [
+        "user_did"
+      ],
+      "clustering_keys": [],
+      "static_columns": [],
+      "global_secondary_indexes": [],
+      "local_secondary_indexes": [],
+      "table_options": null
+    },
+    "characters": {
+      "fields": [
+        [
+          "leveling_state",
+          "leveling",
+          false
+        ],
+        [
+          "name",
+          "text",
+          false
+        ],
+        [
+          "user_did",
+          "text",
+          false
+        ]
+      ],
+      "field_names": [
+        "name",
+        "leveling_state",
+        "user_did"
+      ],
+      "types_by_name": {
+        "name": "text",
+        "user_did": "text",
+        "leveling_state": "leveling"
+      },
+      "type_name": "",
+      "table_name": "",
+      "base_table": "",
+      "partition_keys": [
+        "user_did"
+      ],
+      "clustering_keys": [],
       "static_columns": [],
       "global_secondary_indexes": [],
       "local_secondary_indexes": [],
@@ -168,16 +175,16 @@
       ],
       "field_names": [
         "levels_gained",
+        "progress_percentage",
         "experience",
         "level",
-        "experience_to_next_level",
-        "progress_percentage"
+        "experience_to_next_level"
       ],
       "types_by_name": {
-        "progress_percentage": "float",
-        "experience_to_next_level": "int",
         "level": "int",
+        "experience_to_next_level": "int",
         "levels_gained": "int",
+        "progress_percentage": "float",
         "experience": "int"
       },
       "type_name": "",
@@ -197,6 +204,11 @@
         [
           "event_at",
           "timestamp",
+          false
+        ],
+        [
+          "event_commit_type",
+          "text",
           false
         ],
         [
@@ -226,30 +238,32 @@
         ]
       ],
       "field_names": [
-        "event_id",
         "event_type",
-        "leveling_state",
-        "user_did",
+        "event_commit_type",
         "event_data",
-        "event_at"
+        "event_at",
+        "event_id",
+        "leveling_state",
+        "user_did"
       ],
       "types_by_name": {
-        "user_did": "text",
         "event_id": "text",
-        "event_data": "frozen<map<text, text>>",
         "event_at": "timestamp",
+        "user_did": "text",
+        "event_commit_type": "text",
         "leveling_state": "leveling",
+        "event_data": "frozen<map<text, text>>",
         "event_type": "text"
       },
       "type_name": "",
       "table_name": "",
       "base_table": "",
       "partition_keys": [
-        "event_type",
-        "user_did"
+        "event_type"
       ],
       "clustering_keys": [
-        "event_at"
+        "event_at",
+        "user_did"
       ],
       "static_columns": [],
       "global_secondary_indexes": [],

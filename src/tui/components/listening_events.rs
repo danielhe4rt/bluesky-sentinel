@@ -10,7 +10,7 @@ pub fn listening_events_view(app: &App) -> List {
         .enumerate()
         .map(|(i, text)| {
             // render the selected state
-            let style = if app.task_selected == i {
+            let style = if app.selected_event == i {
                 Style::default().add_modifier(Modifier::REVERSED)
             } else {
                 Style::default()

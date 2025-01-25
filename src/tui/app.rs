@@ -3,6 +3,7 @@ use scylla::transport::{Node, NodeRef};
 use scylla::Metrics;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use crate::models::materialized_views::events_by_type::EventsByType;
 
 pub struct TabsState {
     pub titles: Vec<String>,
@@ -108,11 +109,11 @@ pub struct App {
     pub tabs: TabsState,
     pub coords: Vec<(f64, f64)>,
     pub listened_events: Vec<String>,
-    pub recent_events: Vec<(String, String)>,
+    pub recent_events: Vec<EventsByType>,
     pub nodes: Vec<DeserializedNode>,
     pub enhanced_graphics: bool,
     pub metrics: DriverMetrics,
-    pub task_selected: usize,
+    pub selected_event: usize,
 }
 
 impl App {
@@ -124,16 +125,9 @@ impl App {
             title: app_settings.app_name,
             should_quit: false,
             tabs: TabsState::new(vec!["Events".to_string(), "Connected Nodes".to_string()]),
-            listened_events: vec![
-                "app.bsky.users.follow".to_string(),
-                "app.bsky.users.repost".to_string(),
-            ],
-            task_selected: 0,
-            recent_events: vec![
-                ("Follow".to_string(), "INFO".to_string()),
-                ("Repost".to_string(), "INFO".to_string()),
-                ("Damn".to_string(), "CRITICAL".to_string()),
-            ],
+            listened_events: app_settings.bsky_topics,
+            selected_event: 0,
+            recent_events: vec![EventsByType::default(); 5],
             nodes: vec![DeserializedNode::default(); 10],
             coords: vec![],
             enhanced_graphics: true,
@@ -143,12 +137,12 @@ impl App {
     }
 
     pub fn on_up(&mut self) {
-        self.task_selected = (self.task_selected + 1) % self.listened_events.len();
+        self.selected_event = (self.selected_event + 1) % self.listened_events.len();
     }
 
     pub fn on_down(&mut self) {
-        self.task_selected = if self.task_selected > 0 {
-            self.task_selected - 1
+        self.selected_event = if self.selected_event > 0 {
+            self.selected_event - 1
         } else {
             self.listened_events.len() - 1
         };
@@ -173,7 +167,7 @@ impl App {
 
     pub fn on_tick(&mut self) {
         // Update progress
-        let log = self.recent_events.pop().unwrap();
-        self.recent_events.insert(0, log);
+        //let log = self.recent_events.pop().unwrap();
+        //self.recent_events.insert(0, log);
     }
 }

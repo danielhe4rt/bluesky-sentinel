@@ -6,23 +6,17 @@ use ratatui::widgets::{Block, List, ListItem};
 pub fn event_logs_stream_view(app: &App) -> List {
     // Draw logs
     let info_style = Style::default().fg(Color::Blue);
-    let warning_style = Style::default().fg(Color::Yellow);
-    let error_style = Style::default().fg(Color::Magenta);
-    let critical_style = Style::default().fg(Color::Red);
+
     let logs: Vec<ListItem> = app
         .recent_events
         .iter()
-        .map(move |(evt, level)| {
-            let level = level.as_str();
-            let s = match level {
-                "ERROR" => error_style,
-                "CRITICAL" => critical_style,
-                "WARNING1" => warning_style,
-                _ => info_style,
-            };
+        .map(move |item| {
+            let level = item.user_did.as_str();
+            let ts = item.event_at.format("%Y-%m-%d %H:%M:%S").to_string();
+
             let content = vec![text::Line::from(vec![
-                Span::styled(format!("{level:<9}"), s),
-                Span::raw(evt),
+                Span::styled(format!("{ts:<9}"), info_style),
+                Span::raw(level),
             ])];
             ListItem::new(content)
         })

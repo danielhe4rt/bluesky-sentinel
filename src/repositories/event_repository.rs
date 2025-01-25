@@ -21,6 +21,7 @@ impl EventRepository {
 
     pub async fn insert_event(&self, payload: &NewEventDTO, level_response: LevelResponse) {
         let event = Events {
+            event_commit_type: payload.commit_type.to_string(),
             user_did: payload.user_did.to_string(),
             event_type: payload.event_type.to_string(),
             event_id: payload.event_id.to_string(),

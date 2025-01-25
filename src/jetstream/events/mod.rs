@@ -52,13 +52,23 @@ pub async fn events_handler(
         } => {
             let payload = CreateEventPayload::new(user_info, commit);
 
-            create_event_handler(repository, payload, semaphore).await;
+            create_event_handler("create".to_string(), repository, payload, semaphore).await;
         }
-        CommitEvent::Delete { .. } => {
-            // delete_event_handler(repository, info, commit).await;
+        CommitEvent::Delete {
+            info: user_info,
+            commit,
+        } => {
+            
+            let payload = CreateEventPayload::new(user_info, commit);
+            create_event_handler("delete".to_string(), repository, payload, semaphore).await;
         }
-        CommitEvent::Update { .. } => {
-            // update_event_handler(repository, info, commit).await;
+        CommitEvent::Update {
+            info: user_info,
+            commit,
+        } => {
+            let payload = CreateEventPayload::new(user_info, commit);
+
+            create_event_handler("update".to_string(), repository, payload, semaphore).await;
         }
     }
 }

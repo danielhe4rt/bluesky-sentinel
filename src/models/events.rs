@@ -12,6 +12,7 @@ use charybdis::types::{Frozen, Map, Text, Timestamp};
 )]
 pub struct Events {
     pub user_did: Text,
+    pub event_commit_type: Text,
     pub event_type: Text,
     pub event_id: Text,
     pub event_data: Frozen<Map<Text, Text>>,

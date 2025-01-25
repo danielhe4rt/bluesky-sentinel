@@ -41,7 +41,10 @@ trait CreateEventHandler {
                 // info!("Creating new character for user {}", payload.user_did);
                 match response {
                     Ok(response) => Character::from(response),
-                    Err(_) => Character::default(),
+                    Err(_) => Character{
+                        user_did: payload.user_did.clone(),
+                        ..Default::default()
+                    },
                 }
             }
         };
@@ -103,11 +106,13 @@ trait CreateEventHandler {
 }
 
 pub async fn create_event_handler(
+    commit_event: String,
     repository: &Arc<DatabaseRepository>,
     payload: CreateEventPayload,
     semaphore: Arc<Semaphore>,
 ) {
-    let event_payload = NewEventDTO::from(&payload);
+    let mut event_payload = NewEventDTO::from(&payload);
+    event_payload.commit_type = commit_event;
 
     let repo = Arc::clone(repository);
     let permit = semaphore.acquire_owned().await.unwrap(); // Acquire a semaphore permit

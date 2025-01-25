@@ -3,7 +3,7 @@ use charybdis::macros::charybdis_udt_model;
 use charybdis::types::{Float, Int};
 use serde::Serialize;
 
-#[derive(Default, Serialize)]
+#[derive(Default, Serialize, Clone)]
 #[charybdis_udt_model(type_name = leveling)]
 pub struct Leveling {
     pub level: Int,
