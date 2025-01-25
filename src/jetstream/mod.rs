@@ -1,19 +1,18 @@
 pub mod events;
 pub mod leveling;
 
+use crate::args::AppSettings;
+use crate::jetstream::events::events_handler;
 use crate::repositories::DatabaseRepository;
 use atrium_api::types::string::{Did, Nsid};
 use jetstream_oxide::events::JetstreamEvent::Commit;
 use jetstream_oxide::{
     DefaultJetstreamEndpoints, JetstreamCompression, JetstreamConfig, JetstreamConnector,
 };
-use paris::info;
 use std::sync::Arc;
 use tokio::sync::Semaphore;
-use crate::args::AppSettings;
-use crate::jetstream::events::events_handler;
 
-pub async fn start_jetstream(settings: Arc<AppSettings>, repository: &Arc<DatabaseRepository>) {
+pub async fn start_jetstream(settings: AppSettings, repository: &Arc<DatabaseRepository>) -> anyhow::Result<()> {
     let config = JetstreamConfig {
         endpoint: DefaultJetstreamEndpoints::USEastTwo.into(),
         wanted_collections: settings
@@ -36,7 +35,7 @@ pub async fn start_jetstream(settings: Arc<AppSettings>, repository: &Arc<Databa
         .await
         .expect("Failed to connect to Jetstream");
 
-    info!("Starting Jetstream listener");
+    // info!("Starting Jetstream listener");
 
     let semaphore = Arc::new(Semaphore::new(settings.max_workers));
 
@@ -45,4 +44,6 @@ pub async fn start_jetstream(settings: Arc<AppSettings>, repository: &Arc<Databa
             events_handler(repository, commit, Arc::clone(&semaphore)).await;
         }
     }
+    
+    Ok(())
 }

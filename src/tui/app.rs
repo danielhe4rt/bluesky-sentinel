@@ -2,6 +2,8 @@
 use std::sync::Arc;
 use scylla::Metrics;
 use scylla::transport::{Node, NodeRef};
+use tokio::sync::Mutex;
+use crate::args::AppSettings;
 
 pub struct TabsState {
     pub titles: Vec<String>,
@@ -118,13 +120,13 @@ pub struct App {
 }
 
 impl App {
-    pub fn new(title: String, enhanced_graphics: bool) -> Self {
+    pub fn new(app_settings: AppSettings) -> Arc<Mutex<Self>> {
 
         let metrics = DriverMetrics::default();
 
-        App {
+        let app = App {
             metrics,
-            title,
+            title: app_settings.app_name,
             should_quit: false,
             tabs: TabsState::new(vec!["Events".to_string(), "Connected Nodes".to_string()]),
             listened_events: vec![
@@ -139,8 +141,10 @@ impl App {
             ],
             nodes: vec![DeserializedNode::default(); 10],
             coords: vec![],
-            enhanced_graphics,
-        }
+            enhanced_graphics: true,
+        };
+        
+        Arc::new(Mutex::new(app))
     }
 
     pub fn on_up(&mut self) {

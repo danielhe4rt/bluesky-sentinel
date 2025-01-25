@@ -39,8 +39,11 @@ trait CreateEventHandler {
                     .bsky
                     .get_author_profile(payload.user_did.clone())
                     .await;
-                info!("Creating new character for user {}", payload.user_did);
-                Character::from(response)
+                // info!("Creating new character for user {}", payload.user_did);
+                match response {
+                    Ok(response) => Character::from(response),
+                    Err(_) => Character::default()
+                }
             }
         };
 
@@ -114,10 +117,7 @@ pub async fn create_event_handler(
         let response = select_event_handler(&payload.commit_data.record)
             .handle(&repo, &event_payload)
             .await;
-        info!(
-            "[Created][{}] User {} gained {} experience",
-            event_payload.event_type, event_payload.user_did, response.experience
-        );
+        // info!("[Created][{}] User {} gained {} experience",event_payload.event_type, event_payload.user_did, response.experience);
         drop(permit); // Release the semaphore permit
     });
 }

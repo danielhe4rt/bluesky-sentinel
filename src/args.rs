@@ -1,7 +1,8 @@
 use paris::Logger;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AppSettings {
+    pub app_name: String,
     pub bsky_topics: Vec<String>,
     pub bsky_dids: Option<Vec<String>>,
     pub max_workers: usize,
@@ -11,8 +12,13 @@ impl AppSettings {
     pub fn new() -> Self {
         Logger::new();
         env_logger::init();
-        dotenvy::from_filename(".env").expect("Failed to load .env file");
         
+        dotenvy::from_filename(".env").expect("Failed to load .env file");
+
+        let name = dotenvy::var("APP_NAME")
+            .unwrap_or("BlueSky Sentinel".to_string());
+
+
         let bsky_topics = dotenvy::var("BSKY_TOPICS")
             .unwrap_or("app.bsky.feed.post".to_string())
             .split(',')
@@ -40,6 +46,7 @@ impl AppSettings {
 
 
         Self {
+            app_name: name,
             bsky_topics,
             bsky_dids,
             max_workers

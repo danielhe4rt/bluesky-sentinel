@@ -129,7 +129,7 @@ fn draw_text(frame: &mut Frame, area: Rect) {
 
 fn draw_world_map_tab(frame: &mut Frame, app: &App, area: Rect) {
     let vertical_chunk =
-        Layout::vertical([Constraint::Min(4), Constraint::Percentage(90)]).split(area);
+        Layout::vertical([Constraint::Min(10), Constraint::Percentage(90)]).split(area);
 
     let chunks = Layout::horizontal([Constraint::Percentage(30), Constraint::Percentage(70)])
         .split(vertical_chunk[1]);

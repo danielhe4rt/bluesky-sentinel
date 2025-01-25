@@ -15,7 +15,7 @@
 
 use tui::app::{App, DeserializedNode};
 use tui::crossterm::Tui;
-use crate::database::create_session;
+use crate::database::{create_caching_session, create_session};
 use tui::event_handler::{Event, EventHandler};
 use ::crossterm::event::{KeyCode, KeyEventKind};
 use clap::Parser;
@@ -23,7 +23,12 @@ use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
 use std::sync::Arc;
 use std::{error::Error, io, time::Duration};
+use paris::info;
+use scylla::{CachingSession, Session};
 use tokio::sync::Mutex;
+use crate::args::AppSettings;
+use crate::jetstream::start_jetstream;
+use crate::repositories::DatabaseRepository;
 
 mod database;
 mod utils;
@@ -33,35 +38,37 @@ mod jetstream;
 mod repositories;
 mod models;
 
-/// Demo
-#[derive(Debug, Parser)]
-struct Cli {
-    /// time in ms between two ticks.
-    #[arg(short, long, default_value_t = 100)]
-    tick_rate: u64,
 
-    /// whether unicode symbols are used to improve the overall look of the app
-    #[arg(short, long, default_value_t = true)]
-    unicode: bool,
-}
 #[tokio::main]
 async fn main() -> anyhow::Result<(), Box<dyn Error>> {
-    let cli = Cli::parse();
+    let app_settings = AppSettings::new();
 
-    let session = create_session().await?;
+    let session = create_caching_session().await?;
 
     let app_session = Arc::clone(&session);
+    let hydration_session = Arc::clone(&session);
 
-    let mut app = Arc::new(Mutex::new(App::new(
-        "Bluesky Sentinel Demo - @scylladb".to_string(),
-        cli.unicode,
-    )));
-    let db_app = Arc::clone(&app);
-    let event_app = Arc::clone(&app);
-    let db = Arc::clone(&app_session);
+    let mut app = App::new(app_settings.clone());
+
+    let repository = Arc::new(DatabaseRepository::new(app_session));
+
+
     tokio::spawn(async move {
+        let _ = start_jetstream(app_settings, &repository).await;
+    });
+
+    start_hydration(&mut app, hydration_session);
+
+    start_terminal(&mut app).await?;
+    Ok(())
+}
+
+fn start_hydration(db_app: &Arc<Mutex<App>>, db: Arc<CachingSession>) {
+    let db_app = Arc::clone(db_app);
+    tokio::spawn(async move {
+
         loop {
-            db.query_iter("SELECT * FROM system.local", ()).await.unwrap();
+            let db = db.get_session();
             let metrics = db.get_metrics();
             let cluster = db.get_cluster_data();
             {
@@ -69,16 +76,19 @@ async fn main() -> anyhow::Result<(), Box<dyn Error>> {
                 app.metrics.update(metrics);
                 app.nodes = DeserializedNode::transform_nodes(cluster.get_nodes_info());
             }
-
-            tokio::time::sleep(Duration::from_millis(500)).await;
+            // info!("Hydrated app with metrics and cluster data");
+            tokio::time::sleep(Duration::from_millis(100)).await;
         }
     });
+}
 
-
-
+async fn start_terminal(app: &mut Arc<Mutex<App>>) -> Result<(), Box<dyn Error>> {
     let backend = CrosstermBackend::new(io::stdout());
     let terminal = Terminal::new(backend)?;
+
+    let event_app = Arc::clone(&app);
     let events = EventHandler::new(event_app, 250);
+
     let mut tui = Tui::new(terminal, events);
     tui.init()?;
 
@@ -116,6 +126,5 @@ async fn main() -> anyhow::Result<(), Box<dyn Error>> {
 
     // Exit the user interface.
     tui.exit()?;
-
     Ok(())
 }

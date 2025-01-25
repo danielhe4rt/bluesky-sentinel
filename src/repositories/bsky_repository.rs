@@ -15,7 +15,7 @@ impl BskyRepository {
         Self { client }
     }
 
-    pub async fn get_author_profile(&self, author: String) -> ProfileViewDetailed {
+    pub async fn get_author_profile(&self, author: String) -> anyhow::Result<ProfileViewDetailed> {
         let response = self
             .client
             .service
@@ -24,14 +24,15 @@ impl BskyRepository {
             .actor
             .get_profile(
                 atrium_api::app::bsky::actor::get_profile::ParametersData {
-                    actor: atrium_api::types::string::AtIdentifier::from_str(&author)
-                        .expect("Failed to create AtIdentifier"),
+                    actor: atrium_api::types::string::AtIdentifier::from_str(&author).unwrap()
                 }
                 .into(),
             )
-            .await
-            .expect("Failed to get profile");
+            .await;
 
-        response
+        match response {
+            Ok(response) => Ok(response),
+            Err(e) => Err(anyhow::anyhow!(e))
+        }
     }
 }
