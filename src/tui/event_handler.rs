@@ -1,7 +1,6 @@
-use crate::app::App;
+use crate::tui::app::App;
 use crossterm::event::{Event as CrosstermEvent, KeyEvent, MouseEvent};
 use futures::{FutureExt, StreamExt};
-use scylla::client::session::Session;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::{mpsc, Mutex};
@@ -34,11 +33,10 @@ pub struct EventHandler {
 
 impl EventHandler {
     /// Constructs a new instance of [`EventHandler`].
-    pub fn new(app: Arc<Mutex<App>>, session: Arc<Session>, tick_rate: u64) -> Self {
+    pub fn new(app: Arc<Mutex<App>>, tick_rate: u64) -> Self {
         let tick_rate = Duration::from_millis(tick_rate);
         let (sender, receiver) = mpsc::unbounded_channel();
         let _sender = sender.clone();
-        let event_session = Arc::clone(&session);
         let handler = tokio::spawn(async move {
             let mut reader = crossterm::event::EventStream::new();
             let mut tick = tokio::time::interval(tick_rate);

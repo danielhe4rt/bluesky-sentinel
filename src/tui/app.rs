@@ -1,6 +1,8 @@
-use scylla::observability::metrics::Metrics;
+
 use std::sync::Arc;
-use scylla::cluster::Node as ScyllaNode;
+use scylla::Metrics;
+use scylla::transport::{Node, NodeRef};
+
 pub struct TabsState {
     pub titles: Vec<String>,
     pub index: usize,
@@ -63,7 +65,7 @@ impl DriverMetrics {
 }
 
 #[derive(Debug, Default, Clone)]
-pub struct Node {
+pub struct DeserializedNode {
     pub name: String,
     pub datacenter: String,
     pub coords: (f64, f64),
@@ -71,8 +73,8 @@ pub struct Node {
     pub status: String,
 }
 
-impl Node {
-    pub fn transform_nodes(current_nodes: &[Arc<ScyllaNode>]) -> Vec<Node> {
+impl DeserializedNode {
+    pub fn transform_nodes(current_nodes: &[Arc<Node>]) -> Vec<DeserializedNode> {
         current_nodes
             .iter()
             .map(move |node| {
@@ -89,7 +91,7 @@ impl Node {
                     false => "Down",
                 };
 
-                Node {
+                DeserializedNode {
                     name,
                     datacenter,
                     coords,
@@ -109,7 +111,7 @@ pub struct App {
     pub coords: Vec<(f64, f64)>,
     pub listened_events: Vec<String>,
     pub recent_events: Vec<(String, String)>,
-    pub nodes: Vec<Node>,
+    pub nodes: Vec<DeserializedNode>,
     pub enhanced_graphics: bool,
     pub metrics: DriverMetrics,
     pub task_selected: usize,
@@ -135,7 +137,7 @@ impl App {
                 ("Repost".to_string(), "INFO".to_string()),
                 ("Damn".to_string(), "CRITICAL".to_string()),
             ],
-            nodes: vec![Node::default(); 10],
+            nodes: vec![DeserializedNode::default(); 10],
             coords: vec![],
             enhanced_graphics,
         }

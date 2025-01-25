@@ -1,9 +1,9 @@
-use crate::app::App;
-use crate::components::driver_metrics::driver_metrics_widget;
-use crate::components::event_logs_stream::event_logs_stream_view;
-use crate::components::event_sparkline::event_sparkline_view;
-use crate::components::event_types::event_types_view;
-use crate::components::listening_events::listening_events_view;
+use crate::tui::app::App;
+use crate::tui::components::driver_metrics::driver_metrics_widget;
+use crate::tui::components::event_logs_stream::event_logs_stream_view;
+use crate::tui::components::event_sparkline::event_sparkline_view;
+use crate::tui::components::event_types::event_types_view;
+use crate::tui::components::listening_events::listening_events_view;
 use crate::utils::generate_points_through_continents;
 use ratatui::{
     layout::{Constraint, Layout, Rect},

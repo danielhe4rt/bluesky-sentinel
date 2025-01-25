@@ -1,4 +1,4 @@
-use crate::app::App;
+use crate::tui::app::App;
 use ratatui::prelude::{Modifier, Span, Style};
 use ratatui::text;
 use ratatui::widgets::{Block, List, ListItem};

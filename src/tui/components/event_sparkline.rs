@@ -1,4 +1,4 @@
-use crate::app::App;
+use crate::tui::app::App;
 use ratatui::prelude::{Color, Style};
 use ratatui::symbols;
 use ratatui::widgets::{Block, Sparkline, SparklineBar};

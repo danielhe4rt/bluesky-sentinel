@@ -1,9 +1,10 @@
-use crate::app::App;
+use crate::tui::app::App;
 use ratatui::prelude::{Color, Span, Style};
 use ratatui::text;
 use ratatui::widgets::{Block, List, ListItem};
 
-pub fn event_types_view(app: &App) -> List {
+pub fn event_logs_stream_view(app: &App) -> List {
+    // Draw logs
     let info_style = Style::default().fg(Color::Blue);
     let warning_style = Style::default().fg(Color::Yellow);
     let error_style = Style::default().fg(Color::Magenta);
@@ -16,7 +17,7 @@ pub fn event_types_view(app: &App) -> List {
             let s = match level {
                 "ERROR" => error_style,
                 "CRITICAL" => critical_style,
-                "WARNING" => warning_style,
+                "WARNING1" => warning_style,
                 _ => info_style,
             };
             let content = vec![text::Line::from(vec![
@@ -26,5 +27,6 @@ pub fn event_types_view(app: &App) -> List {
             ListItem::new(content)
         })
         .collect();
-    List::new(logs).block(Block::bordered().title("Latest Logs"))
+
+    List::new(logs).block(Block::bordered().title("BlueSky Event Logs"))
 }

@@ -13,10 +13,10 @@
 //! [examples]: https://github.com/ratatui/ratatui/blob/main/examples
 //! [examples readme]: https://github.com/ratatui/ratatui/blob/main/examples/README.md
 
-use crate::app::{App, DriverMetrics, Node};
-use crate::crossterm::Tui;
+use tui::app::{App, DeserializedNode};
+use tui::crossterm::Tui;
 use crate::database::create_session;
-use crate::event_handler::{Event, EventHandler};
+use tui::event_handler::{Event, EventHandler};
 use ::crossterm::event::{KeyCode, KeyEventKind};
 use clap::Parser;
 use ratatui::backend::CrosstermBackend;
@@ -25,17 +25,13 @@ use std::sync::Arc;
 use std::{error::Error, io, time::Duration};
 use tokio::sync::Mutex;
 
-mod app;
-
-mod crossterm;
-
-mod components;
 mod database;
-mod event;
-mod event_handler;
-mod formatters;
-mod ui;
 mod utils;
+mod tui;
+mod args;
+mod jetstream;
+mod repositories;
+mod models;
 
 /// Demo
 #[derive(Debug, Parser)]
@@ -71,7 +67,7 @@ async fn main() -> anyhow::Result<(), Box<dyn Error>> {
             {
                 let mut app = db_app.lock().await;
                 app.metrics.update(metrics);
-                app.nodes = Node::transform_nodes(cluster.get_nodes_info());
+                app.nodes = DeserializedNode::transform_nodes(cluster.get_nodes_info());
             }
 
             tokio::time::sleep(Duration::from_millis(500)).await;
@@ -82,7 +78,7 @@ async fn main() -> anyhow::Result<(), Box<dyn Error>> {
 
     let backend = CrosstermBackend::new(io::stdout());
     let terminal = Terminal::new(backend)?;
-    let events = EventHandler::new(event_app, app_session, 250);
+    let events = EventHandler::new(event_app, 250);
     let mut tui = Tui::new(terminal, events);
     tui.init()?;
 

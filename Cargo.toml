@@ -7,9 +7,18 @@ edition = "2021"
 ratatui = { version = "0.29.0", features = ["crossterm"] }
 rand = "0.8.5"
 clap = { version = "4.5.27", features = ["derive"] }
-scylla = { git = "https://github.com/scylladb/scylla-rust-driver" }
+scylla = { version = "0.15.1" }
 anyhow = "1.0.95"
 tokio = { version = "1.43.0", features = ["full"] }
 uuid = { version = "1.12.1", features = ["v4"] }
 futures = "0.3.31"
 crossterm = { version = "0.28.1", features = ["event-stream"] }
+charybdis = { version = "0.7.11", features = ["migrate"] }
+dotenvy = "0.15.7"
+paris = { version = "1.5.15", features = ["macros"] }
+env_logger = "0.11.6"
+jetstream-oxide = "0.1.0"
+atrium-xrpc-client = { version = "0.5.10", features = ["reqwest"] }
+atrium-api = "0.24.10"
+serde = { version = "1.0.217", features = ["derive"] }
+async-trait = "0.1.85"
