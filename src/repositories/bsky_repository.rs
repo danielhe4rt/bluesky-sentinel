@@ -24,7 +24,7 @@ impl BskyRepository {
             .actor
             .get_profile(
                 atrium_api::app::bsky::actor::get_profile::ParametersData {
-                    actor: atrium_api::types::string::AtIdentifier::from_str(&author).unwrap()
+                    actor: atrium_api::types::string::AtIdentifier::from_str(&author).unwrap(),
                 }
                 .into(),
             )
@@ -32,7 +32,7 @@ impl BskyRepository {
 
         match response {
             Ok(response) => Ok(response),
-            Err(e) => Err(anyhow::anyhow!(e))
+            Err(e) => Err(anyhow::anyhow!(e)),
         }
     }
 }

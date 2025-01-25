@@ -1,4 +1,3 @@
-
 use crate::jetstream::events::create::CreateEventHandler;
 use crate::jetstream::events::dto::NewEventDTO;
 

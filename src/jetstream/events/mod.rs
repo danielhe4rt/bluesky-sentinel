@@ -2,13 +2,13 @@ pub mod create;
 pub mod delete;
 pub mod dto;
 
+use crate::jetstream::events::create::create_event_handler;
 use crate::repositories::DatabaseRepository;
 use jetstream_oxide::events::commit::{CommitData, CommitEvent};
 use jetstream_oxide::events::EventInfo;
 use std::fmt::Display;
 use std::sync::Arc;
 use tokio::sync::Semaphore;
-use crate::jetstream::events::create::create_event_handler;
 
 enum AppBskyEventRecord {
     Post,

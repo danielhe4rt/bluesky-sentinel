@@ -1,9 +1,8 @@
-
+use crate::jetstream::events::{AppBskyEventRecord, CreateEventPayload};
 use atrium_api::app::bsky::feed::post::RecordEmbedRefs;
 use atrium_api::record::KnownRecord;
 use atrium_api::types::Union::Refs;
 use std::collections::HashMap;
-use crate::jetstream::events::{AppBskyEventRecord, CreateEventPayload};
 
 pub struct NewEventDTO {
     pub user_did: String,

@@ -10,7 +10,6 @@ use crate::repositories::DatabaseRepository;
 use atrium_api::record::KnownRecord;
 use atrium_api::record::KnownRecord::AppBskyFeedPost;
 use charybdis::types::Counter;
-use paris::info;
 use std::sync::Arc;
 use tokio::sync::Semaphore;
 use KnownRecord::{AppBskyFeedLike, AppBskyFeedRepost};
@@ -42,7 +41,7 @@ trait CreateEventHandler {
                 // info!("Creating new character for user {}", payload.user_did);
                 match response {
                     Ok(response) => Character::from(response),
-                    Err(_) => Character::default()
+                    Err(_) => Character::default(),
                 }
             }
         };

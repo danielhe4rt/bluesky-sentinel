@@ -13,31 +13,29 @@
 //! [examples]: https://github.com/ratatui/ratatui/blob/main/examples
 //! [examples readme]: https://github.com/ratatui/ratatui/blob/main/examples/README.md
 
-use tui::app::{App, DeserializedNode};
-use tui::crossterm::Tui;
-use crate::database::{create_caching_session, create_session};
-use tui::event_handler::{Event, EventHandler};
-use ::crossterm::event::{KeyCode, KeyEventKind};
-use clap::Parser;
-use ratatui::backend::CrosstermBackend;
-use ratatui::Terminal;
-use std::sync::Arc;
-use std::{error::Error, io, time::Duration};
-use paris::info;
-use scylla::{CachingSession, Session};
-use tokio::sync::Mutex;
 use crate::args::AppSettings;
+use crate::database::create_caching_session;
 use crate::jetstream::start_jetstream;
 use crate::repositories::DatabaseRepository;
+use clap::Parser;
+use ::crossterm::event::{KeyCode, KeyEventKind};
+use ratatui::backend::CrosstermBackend;
+use ratatui::Terminal;
+use scylla::CachingSession;
+use std::sync::Arc;
+use std::{error::Error, io, time::Duration};
+use tokio::sync::Mutex;
+use tui::app::{App, DeserializedNode};
+use tui::crossterm::Tui;
+use tui::event_handler::{Event, EventHandler};
 
-mod database;
-mod utils;
-mod tui;
 mod args;
+mod database;
 mod jetstream;
-mod repositories;
 mod models;
-
+mod repositories;
+mod tui;
+mod utils;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<(), Box<dyn Error>> {
@@ -52,7 +50,6 @@ async fn main() -> anyhow::Result<(), Box<dyn Error>> {
 
     let repository = Arc::new(DatabaseRepository::new(app_session));
 
-
     tokio::spawn(async move {
         let _ = start_jetstream(app_settings, &repository).await;
     });
@@ -66,7 +63,6 @@ async fn main() -> anyhow::Result<(), Box<dyn Error>> {
 fn start_hydration(db_app: &Arc<Mutex<App>>, db: Arc<CachingSession>) {
     let db_app = Arc::clone(db_app);
     tokio::spawn(async move {
-
         loop {
             let db = db.get_session();
             let metrics = db.get_metrics();

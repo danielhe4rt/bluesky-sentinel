@@ -1,8 +1,8 @@
 use anyhow::Result;
 
-use std::sync::Arc;
-use scylla::{CachingSession, Session, SessionBuilder};
 use scylla::transport::session::{CurrentDeserializationApi, GenericSession};
+use scylla::{CachingSession, SessionBuilder};
+use std::sync::Arc;
 
 pub async fn create_session() -> Result<GenericSession<CurrentDeserializationApi>> {
     let session = SessionBuilder::new()
@@ -11,7 +11,7 @@ pub async fn create_session() -> Result<GenericSession<CurrentDeserializationApi
         .await?;
 
     session.use_keyspace("bsky_rpg", true).await?;
-    
+
     Ok(session)
 }
 

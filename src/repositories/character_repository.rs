@@ -4,10 +4,9 @@ use crate::models::character::Character;
 use crate::models::character_experience::CharacterExperience;
 use crate::models::udts::leveling::Leveling;
 use charybdis::operations::{Find, Insert};
+use charybdis::scylla::CachingSession;
 use charybdis::types::Counter;
 use std::sync::Arc;
-use charybdis::scylla::CachingSession;
-
 
 pub struct CharacterRepository {
     pub session: Arc<CachingSession>,

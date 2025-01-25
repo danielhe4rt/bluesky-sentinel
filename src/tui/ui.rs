@@ -56,7 +56,6 @@ fn draw_gauges(frame: &mut Frame, app: &App, area: Rect) {
     let block = Block::bordered().title("Graphs");
     frame.render_widget(block, area);
 
-
     let sparkline = event_sparkline_view(app);
     frame.render_widget(sparkline, chunks[0]);
 }

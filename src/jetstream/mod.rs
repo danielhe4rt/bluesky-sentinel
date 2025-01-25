@@ -12,7 +12,10 @@ use jetstream_oxide::{
 use std::sync::Arc;
 use tokio::sync::Semaphore;
 
-pub async fn start_jetstream(settings: AppSettings, repository: &Arc<DatabaseRepository>) -> anyhow::Result<()> {
+pub async fn start_jetstream(
+    settings: AppSettings,
+    repository: &Arc<DatabaseRepository>,
+) -> anyhow::Result<()> {
     let config = JetstreamConfig {
         endpoint: DefaultJetstreamEndpoints::USEastTwo.into(),
         wanted_collections: settings
@@ -23,7 +26,11 @@ pub async fn start_jetstream(settings: AppSettings, repository: &Arc<DatabaseRep
         wanted_dids: settings
             .bsky_dids
             .as_ref()
-            .map(|dids| dids.iter().map(|s| Did::new(s.to_string()).expect("Failed to create DID")).collect())
+            .map(|dids| {
+                dids.iter()
+                    .map(|s| Did::new(s.to_string()).expect("Failed to create DID"))
+                    .collect()
+            })
             .unwrap_or_default(),
         compression: JetstreamCompression::Zstd,
         cursor: None,
@@ -44,6 +51,6 @@ pub async fn start_jetstream(settings: AppSettings, repository: &Arc<DatabaseRep
             events_handler(repository, commit, Arc::clone(&semaphore)).await;
         }
     }
-    
+
     Ok(())
 }

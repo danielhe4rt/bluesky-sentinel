@@ -5,8 +5,8 @@ use crate::models::udts::leveling::Leveling;
 use charybdis::operations::Insert;
 use charybdis::types::Timestamp;
 
-use std::sync::Arc;
 use scylla::CachingSession;
+use std::sync::Arc;
 
 pub struct EventRepository {
     pub session: Arc<CachingSession>,

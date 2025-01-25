@@ -12,12 +12,10 @@ impl AppSettings {
     pub fn new() -> Self {
         Logger::new();
         env_logger::init();
-        
+
         dotenvy::from_filename(".env").expect("Failed to load .env file");
 
-        let name = dotenvy::var("APP_NAME")
-            .unwrap_or("BlueSky Sentinel".to_string());
-
+        let name = dotenvy::var("APP_NAME").unwrap_or("BlueSky Sentinel".to_string());
 
         let bsky_topics = dotenvy::var("BSKY_TOPICS")
             .unwrap_or("app.bsky.feed.post".to_string())
@@ -25,31 +23,26 @@ impl AppSettings {
             .map(|s| s.to_string())
             .collect();
 
-        let bsky_dids = dotenvy::var("BSKY_DIDS")
-            .unwrap();
-        
+        let bsky_dids = dotenvy::var("BSKY_DIDS").unwrap();
+
         let max_workers = dotenvy::var("MAX_WORKERS")
             .unwrap_or("5".to_string())
             .parse::<usize>()
             .expect("Failed to parse WORKERS");
 
         let bsky_dids: Option<Vec<String>> = if !bsky_dids.is_empty() {
-            let dids = bsky_dids
-                .split(',')
-                .map(|s| s.to_string())
-                .collect();
+            let dids = bsky_dids.split(',').map(|s| s.to_string()).collect();
 
             Some(dids)
         } else {
             None
         };
 
-
         Self {
             app_name: name,
             bsky_topics,
             bsky_dids,
-            max_workers
+            max_workers,
         }
     }
 }

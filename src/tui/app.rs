@@ -1,9 +1,8 @@
-
-use std::sync::Arc;
-use scylla::Metrics;
-use scylla::transport::{Node, NodeRef};
-use tokio::sync::Mutex;
 use crate::args::AppSettings;
+use scylla::transport::{Node, NodeRef};
+use scylla::Metrics;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 pub struct TabsState {
     pub titles: Vec<String>,
@@ -26,7 +25,6 @@ impl TabsState {
         }
     }
 }
-
 
 #[derive(Debug, Default)]
 pub struct DriverMetrics {
@@ -62,7 +60,6 @@ impl DriverMetrics {
         self.avg_latency = metrics.get_latency_avg_ms().unwrap_or_default();
         self.p99_latency = metrics.get_latency_percentile_ms(99.9).unwrap_or_default();
         self.p50_latency = metrics.get_latency_percentile_ms(50.0).unwrap_or_default();
-
     }
 }
 
@@ -105,7 +102,6 @@ impl DeserializedNode {
     }
 }
 
-
 pub struct App {
     pub title: String,
     pub should_quit: bool,
@@ -121,7 +117,6 @@ pub struct App {
 
 impl App {
     pub fn new(app_settings: AppSettings) -> Arc<Mutex<Self>> {
-
         let metrics = DriverMetrics::default();
 
         let app = App {
@@ -143,7 +138,7 @@ impl App {
             coords: vec![],
             enhanced_graphics: true,
         };
-        
+
         Arc::new(Mutex::new(app))
     }
 
