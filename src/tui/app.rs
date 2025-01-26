@@ -1,5 +1,5 @@
 use crate::args::AppSettings;
-use scylla::transport::{Node, NodeRef};
+use scylla::transport::Node;
 use scylla::Metrics;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -36,20 +36,6 @@ pub struct DriverMetrics {
     pub avg_latency: u64,
     pub p99_latency: u64,
     pub p50_latency: u64,
-}
-
-impl DriverMetrics {
-    pub fn from_db(metrics: Arc<Metrics>) -> Self {
-        Self {
-            queries_count: metrics.get_queries_num(),
-            errors_count: metrics.get_errors_num(),
-            iter_queries_count: metrics.get_queries_iter_num(),
-            iter_errors_count: metrics.get_errors_iter_num(),
-            avg_latency: metrics.get_latency_avg_ms().unwrap_or_default(),
-            p99_latency: metrics.get_latency_percentile_ms(99.9).unwrap_or_default(),
-            p50_latency: metrics.get_latency_percentile_ms(50.0).unwrap_or_default(),
-        }
-    }
 }
 
 impl DriverMetrics {
@@ -107,7 +93,6 @@ pub struct App {
     pub title: String,
     pub should_quit: bool,
     pub tabs: TabsState,
-    pub coords: Vec<(f64, f64)>,
     pub listened_events: Vec<String>,
     pub recent_events: Vec<EventsByType>,
     pub nodes: Vec<DeserializedNode>,
@@ -129,7 +114,6 @@ impl App {
             selected_event: 0,
             recent_events: vec![EventsByType::default(); 5],
             nodes: vec![DeserializedNode::default(); 10],
-            coords: vec![],
             enhanced_graphics: true,
         };
 
@@ -157,11 +141,8 @@ impl App {
     }
 
     pub fn on_key(&mut self, c: char) {
-        match c {
-            'q' => {
-                self.should_quit = true;
-            }
-            _ => {}
+        if c == 'q' {
+            self.should_quit = true;
         }
     }
 

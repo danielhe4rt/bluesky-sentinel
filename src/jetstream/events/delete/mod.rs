@@ -2,7 +2,6 @@ mod create;
 mod like;
 mod repost;
 
-use std::collections::HashMap;
 use crate::jetstream::events::delete::create::CreatePostEvent;
 use crate::jetstream::events::delete::like::LikePostEvent;
 use crate::jetstream::events::delete::repost::RepostEvent;
@@ -16,29 +15,6 @@ use charybdis::types::Counter;
 use std::sync::Arc;
 use tokio::sync::Semaphore;
 
-struct DeleteEventDTO {
-    pub user_did: String,
-    pub commit_type: String,
-    pub event_id: String,
-    pub event_type: String,
-    pub posted_at: u64,
-    pub context: HashMap<String, String>,
-}
-
-impl DeleteEventDTO {
-    fn from(payload: &DeleteEventPayload) -> Self {
-        let mut context = HashMap::new();
-
-        DeleteEventDTO {
-            user_did: payload.event_info.did.to_string(),
-            posted_at: payload.event_info.time_us,
-            event_id: payload.commit_info.rkey.clone(),
-            event_type: payload.commit_info.collection.clone().to_string(),
-            context,
-            commit_type: "delete".to_string(),
-        }
-    }
-}
 
 #[async_trait::async_trait]
 trait DeleteEventHandler {
@@ -140,7 +116,7 @@ pub async fn delete_event_handler(
     let permit = semaphore.acquire_owned().await.unwrap(); // Acquire a semaphore permit
 
     tokio::spawn(async move {
-        let response = select_event_handler(&payload.commit_info.collection.as_str())
+        let _ = select_event_handler(&payload.commit_info.collection.as_str())
             .handle(&repo, &event_payload)
             .await;
         // info!("[Created][{}] User {} gained {} experience",event_payload.event_type, event_payload.user_did, response.experience);

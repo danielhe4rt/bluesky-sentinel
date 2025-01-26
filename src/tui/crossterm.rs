@@ -7,7 +7,6 @@ use ratatui::backend::Backend;
 use ratatui::Terminal;
 use std::io;
 use std::panic;
-use std::sync::{Arc, Mutex};
 
 /// Representation of a terminal user interface.
 ///

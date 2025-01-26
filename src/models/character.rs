@@ -3,7 +3,7 @@ use crate::models::udts::leveling::Leveling;
 use atrium_api::app::bsky::actor::defs::ProfileViewDetailed;
 use charybdis::macros::charybdis_model;
 use charybdis::types::Text;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 #[derive(Default, Serialize)]
 #[charybdis_model(

@@ -4,7 +4,6 @@ use crate::tui::components::event_logs_stream::event_logs_stream_view;
 use crate::tui::components::event_sparkline::event_sparkline_view;
 use crate::tui::components::event_types::event_types_view;
 use crate::tui::components::listening_events::listening_events_view;
-use crate::utils::generate_points_through_continents;
 use ratatui::{
     layout::{Constraint, Layout, Rect},
     style::{Color, Modifier, Style},
@@ -195,14 +194,7 @@ fn draw_world_map_tab(frame: &mut Frame, app: &App, area: Rect) {
                 radius: 10.0,
                 color: Color::Green,
             });
-            let coordinates = generate_points_through_continents(20);
-            for coordinate in coordinates {
-                ctx.print(
-                    coordinate.latitude,
-                    coordinate.longitude,
-                    Span::styled("X", Style::default().fg(Color::Yellow)),
-                );
-            }
+
 
             for (i, s1) in app.nodes.iter().enumerate() {
                 for s2 in &app.nodes[i + 1..] {

@@ -17,7 +17,7 @@ pub struct NewEventDTO {
 
 impl From<&DeleteEventPayload> for NewEventDTO {
     fn from(payload: &DeleteEventPayload) -> Self {
-        let mut context = HashMap::new();
+        let context = HashMap::new();
 
         NewEventDTO {
             user_did: payload.event_info.did.to_string(),

@@ -118,7 +118,7 @@ pub async fn create_event_handler(
     let permit = semaphore.acquire_owned().await.unwrap(); // Acquire a semaphore permit
 
     tokio::spawn(async move {
-        let response = select_event_handler(&payload.commit_data.record)
+        let _ = select_event_handler(&payload.commit_data.record)
             .handle(&repo, &event_payload)
             .await;
         // info!("[Created][{}] User {} gained {} experience",event_payload.event_type, event_payload.user_did, response.experience);

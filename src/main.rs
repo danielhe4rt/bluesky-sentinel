@@ -3,12 +3,11 @@
 use crate::args::AppSettings;
 use crate::database::create_caching_session;
 use crate::jetstream::start_jetstream;
-use crate::models::materialized_views::events_by_type::{find_events_by_type_query, EventsByType};
+use crate::models::materialized_views::events_by_type::EventsByType;
 use crate::repositories::DatabaseRepository;
+use chrono::{Timelike, Utc};
 use ::crossterm::event::{KeyCode, KeyEventKind};
-use charybdis::operations::Find;
-use clap::Parser;
-use futures::stream::StreamExt;
+
 use futures::TryStreamExt;
 use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
@@ -16,7 +15,6 @@ use scylla::query::Query;
 use scylla::CachingSession;
 use std::sync::Arc;
 use std::{error::Error, io, time::Duration};
-use chrono::{Timelike, Utc};
 use tokio::sync::Mutex;
 use tui::app::{App, DeserializedNode};
 use tui::crossterm::Tui;
@@ -28,7 +26,6 @@ mod jetstream;
 mod models;
 mod repositories;
 mod tui;
-mod utils;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<(), Box<dyn Error>> {
@@ -59,7 +56,7 @@ fn start_hydration(db_app: &Arc<Mutex<App>>, db: Arc<CachingSession>) {
     tokio::spawn(async move {
         loop {
             let selected_item = {
-                let mut app = app.lock().await;
+                let app = app.lock().await;
                 app.listened_events[app.selected_event].clone()
             };
 
@@ -104,11 +101,9 @@ fn start_hydration(db_app: &Arc<Mutex<App>>, db: Arc<CachingSession>) {
 async fn start_terminal(app: &mut Arc<Mutex<App>>) -> Result<(), Box<dyn Error>> {
     let backend = CrosstermBackend::new(io::stdout());
     let terminal = Terminal::new(backend)?;
-
-    let event_app = Arc::clone(&app);
-    let events = EventHandler::new(event_app, 50);
-
+    let events = EventHandler::new(50);
     let mut tui = Tui::new(terminal, events);
+
     tui.init()?;
 
     // Start the main loop.

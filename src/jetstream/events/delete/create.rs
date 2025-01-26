@@ -11,7 +11,7 @@ impl CreatePostEvent {
 
 #[async_trait::async_trait]
 impl DeleteEventHandler for CreatePostEvent {
-    fn calculate_exp(&self, dto: &NewEventDTO) -> i32 {
+    fn calculate_exp(&self, _: &NewEventDTO) -> i32 {
         30
     }
 }

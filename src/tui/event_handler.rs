@@ -1,9 +1,7 @@
-use crate::tui::app::App;
-use crossterm::event::{Event as CrosstermEvent, KeyEvent, MouseEvent};
+use crossterm::event::{Event as CrosstermEvent, KeyEvent};
 use futures::{FutureExt, StreamExt};
-use std::sync::Arc;
 use std::time::Duration;
-use tokio::sync::{mpsc, Mutex};
+use tokio::sync::mpsc;
 
 /// Terminal events.
 #[derive(Clone, Copy, Debug)]
@@ -29,7 +27,7 @@ pub struct EventHandler {
 
 impl EventHandler {
     /// Constructs a new instance of [`EventHandler`].
-    pub fn new(app: Arc<Mutex<App>>, tick_rate: u64) -> Self {
+    pub fn new(tick_rate: u64) -> Self {
         let tick_rate = Duration::from_millis(tick_rate);
         let (sender, receiver) = mpsc::unbounded_channel();
         let _sender = sender.clone();
