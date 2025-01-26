@@ -12,11 +12,7 @@ pub enum Event {
     Tick,
     /// Key press.
     Key(KeyEvent),
-    /// Mouse click/scroll.
-    Mouse(MouseEvent),
-    /// Terminal resize.
-    Resize(u16, u16),
-    Quit,
+
 }
 
 /// Terminal event handler.
@@ -52,19 +48,10 @@ impl EventHandler {
                   }
 
                   Some(Ok(evt)) = crossterm_event => {
-                    match evt {
-                      CrosstermEvent::Key(key) => {
-                        if key.kind == crossterm::event::KeyEventKind::Press {
-                          _sender.send(Event::Key(key)).unwrap();
-                        }
-                      },
-                      CrosstermEvent::Mouse(mouse) => {
-                        _sender.send(Event::Mouse(mouse)).unwrap();
-                      },
-                      CrosstermEvent::Resize(x, y) => {
-                        _sender.send(Event::Resize(x, y)).unwrap();
-                      },
-                      _ => {}
+                    if let CrosstermEvent::Key(key) = evt {
+                      if key.kind == crossterm::event::KeyEventKind::Press {
+                        _sender.send(Event::Key(key)).unwrap();
+                      }
                     }
                   }
                 }

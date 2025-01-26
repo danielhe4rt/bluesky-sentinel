@@ -269,6 +269,7 @@ dependencies = [
  "atrium-api",
  "atrium-xrpc-client",
  "charybdis",
+ "chrono",
  "clap",
  "crossterm",
  "dotenvy",

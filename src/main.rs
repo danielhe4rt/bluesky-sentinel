@@ -1,16 +1,22 @@
+#![feature(iterator_try_collect)]
+
 use crate::args::AppSettings;
 use crate::database::create_caching_session;
 use crate::jetstream::start_jetstream;
-use crate::models::materialized_views::events_by_type::EventsByType;
+use crate::models::materialized_views::events_by_type::{find_events_by_type_query, EventsByType};
 use crate::repositories::DatabaseRepository;
 use ::crossterm::event::{KeyCode, KeyEventKind};
 use charybdis::operations::Find;
 use clap::Parser;
+use futures::stream::StreamExt;
+use futures::TryStreamExt;
 use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
+use scylla::query::Query;
 use scylla::CachingSession;
 use std::sync::Arc;
 use std::{error::Error, io, time::Duration};
+use chrono::{Timelike, Utc};
 use tokio::sync::Mutex;
 use tui::app::{App, DeserializedNode};
 use tui::crossterm::Tui;
@@ -56,18 +62,26 @@ fn start_hydration(db_app: &Arc<Mutex<App>>, db: Arc<CachingSession>) {
                 let mut app = app.lock().await;
                 app.listened_events[app.selected_event].clone()
             };
-            let events = EventsByType {
-                event_type: selected_item,
-                ..Default::default()
+
+            let current_timestamp = Utc::now()
+                .with_second(0)
+                .unwrap()
+                .with_nanosecond(0)
+                .unwrap();
+
+            let query = Query::new("SELECT * FROM events_by_type WHERE event_type = ? AND bucket_id = ? LIMIT 100");
+
+            let mut events_result = db
+                .execute_iter(query, (selected_item,current_timestamp))
+                .await
+                .unwrap()
+                .rows_stream::<EventsByType>()
+                .unwrap();
+
+            let mut events = vec![];
+            while let Some(event) = events_result.try_next().await.unwrap() {
+                events.push(event);
             }
-            .find_by_partition_key()
-            .page_size(100)
-            .execute(&db)
-            .await
-            .unwrap()
-            .try_collect()
-            .await
-            .unwrap();
 
             let db = db.get_session();
             let metrics = db.get_metrics();
@@ -81,7 +95,8 @@ fn start_hydration(db_app: &Arc<Mutex<App>>, db: Arc<CachingSession>) {
                 app.nodes = DeserializedNode::transform_nodes(cluster.get_nodes_info());
             }
             // info!("Hydrated app with metrics and cluster data");
-            tokio::time::sleep(Duration::from_millis(100)).await;
+
+            tokio::time::sleep(Duration::from_millis(50)).await;
         }
     });
 }
@@ -122,9 +137,6 @@ async fn start_terminal(app: &mut Arc<Mutex<App>>) -> Result<(), Box<dyn Error>>
                     }
                 }
             }
-            Event::Quit => break,
-            Event::Mouse(_) => {}
-            Event::Resize(_, _) => {}
         }
     }
 

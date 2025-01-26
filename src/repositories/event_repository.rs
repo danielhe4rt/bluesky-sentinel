@@ -7,6 +7,7 @@ use charybdis::types::Timestamp;
 
 use scylla::CachingSession;
 use std::sync::Arc;
+use chrono::{Timelike, Utc};
 
 pub struct EventRepository {
     pub session: Arc<CachingSession>,
@@ -20,8 +21,15 @@ impl EventRepository {
     }
 
     pub async fn insert_event(&self, payload: &NewEventDTO, level_response: LevelResponse) {
+        let current_timestamp = Utc::now()
+            .with_second(0)
+            .unwrap()
+            .with_nanosecond(0)
+            .unwrap();
+
         let event = Events {
             event_commit_type: payload.commit_type.to_string(),
+            bucket_id: current_timestamp,
             user_did: payload.user_did.to_string(),
             event_type: payload.event_type.to_string(),
             event_id: payload.event_id.to_string(),

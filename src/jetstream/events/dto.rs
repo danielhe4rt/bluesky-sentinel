@@ -1,4 +1,4 @@
-use crate::jetstream::events::{AppBskyEventRecord, CreateEventPayload};
+use crate::jetstream::events::{AppBskyEventRecord, CreateEventPayload, DeleteEventPayload};
 use atrium_api::app::bsky::feed::post::RecordEmbedRefs;
 use atrium_api::record::KnownRecord;
 use atrium_api::types::Union::Refs;
@@ -12,6 +12,22 @@ pub struct NewEventDTO {
     pub event_type: String,
     pub posted_at: u64,
     pub context: HashMap<String, String>,
+}
+
+
+impl From<&DeleteEventPayload> for NewEventDTO {
+    fn from(payload: &DeleteEventPayload) -> Self {
+        let mut context = HashMap::new();
+
+        NewEventDTO {
+            user_did: payload.event_info.did.to_string(),
+            posted_at: payload.event_info.time_us,
+            event_id: payload.commit_info.rkey.clone(),
+            event_type: payload.commit_info.collection.clone().to_string(),
+            context,
+            commit_type: "delete".to_string(),
+        }
+    }
 }
 
 impl From<&CreateEventPayload> for NewEventDTO {

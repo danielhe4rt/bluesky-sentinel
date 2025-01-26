@@ -4,7 +4,7 @@ use charybdis::types::{Frozen, Map, Text, Timestamp};
 
 #[charybdis_model(
     table_name = events,
-    partition_keys = [user_did],
+    partition_keys = [user_did, bucket_id],
     clustering_keys = [event_at],
     table_options = r#"
           CLUSTERING ORDER BY (event_at DESC)
@@ -12,6 +12,7 @@ use charybdis::types::{Frozen, Map, Text, Timestamp};
 )]
 pub struct Events {
     pub user_did: Text,
+    pub bucket_id: Timestamp,
     pub event_commit_type: Text,
     pub event_type: Text,
     pub event_id: Text,

@@ -6,6 +6,7 @@ use crate::models::udts::leveling::Leveling;
 use charybdis::operations::{Find, Insert};
 use charybdis::scylla::CachingSession;
 use charybdis::types::Counter;
+use futures::TryStreamExt;
 use std::sync::Arc;
 
 pub struct CharacterRepository {
@@ -20,31 +21,38 @@ impl CharacterRepository {
     }
     pub async fn find_by_partition_key(&self, user_did: String) -> Option<Character> {
         let character = Character {
-            user_did,
+            user_did: user_did.clone(),
             ..Default::default()
         };
-
-        character
-            .maybe_find_by_primary_key()
+        
+        character.find_by_partition_key()
             .execute(&self.session)
             .await
             .unwrap()
+            .try_collect()
+            .await
+            .unwrap()
+            .pop()
     }
 
     pub async fn find_character_experience_by_partition_key(
         &self,
         user_did: String,
     ) -> Option<CharacterExperience> {
-        let character_experience = CharacterExperience {
-            user_did,
+        let character = CharacterExperience {
+            user_did: user_did.clone(),
             current_experience: Counter(0),
         };
-
-        character_experience
-            .maybe_find_by_primary_key()
+        
+        character.find_by_partition_key()
             .execute(&self.session)
             .await
             .unwrap()
+            .try_collect()
+            .await
+            .unwrap()
+            .pop()
+            
     }
 
     pub async fn increment_character_experience(

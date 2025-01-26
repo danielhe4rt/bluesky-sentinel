@@ -4,11 +4,12 @@ pub mod dto;
 
 use crate::jetstream::events::create::create_event_handler;
 use crate::repositories::DatabaseRepository;
-use jetstream_oxide::events::commit::{CommitData, CommitEvent};
+use jetstream_oxide::events::commit::{CommitData, CommitEvent, CommitInfo};
 use jetstream_oxide::events::EventInfo;
 use std::fmt::Display;
 use std::sync::Arc;
 use tokio::sync::Semaphore;
+use crate::jetstream::events::delete::delete_event_handler;
 
 enum AppBskyEventRecord {
     Post,
@@ -22,6 +23,22 @@ impl Display for AppBskyEventRecord {
             AppBskyEventRecord::Post => write!(f, "app.bsky.feed.post"),
             AppBskyEventRecord::Like => write!(f, "app.bsky.feed.like"),
             AppBskyEventRecord::Repost => write!(f, "app.bsky.feed.repost"),
+        }
+    }
+
+}
+
+
+pub struct DeleteEventPayload {
+    event_info: EventInfo,
+    commit_info: CommitInfo,
+}
+
+impl DeleteEventPayload {
+    fn new(event_info: EventInfo, commit_info: CommitInfo) -> Self {
+        Self {
+            event_info,
+            commit_info,
         }
     }
 }
@@ -58,16 +75,15 @@ pub async fn events_handler(
             info: user_info,
             commit,
         } => {
-            
-            let payload = CreateEventPayload::new(user_info, commit);
-            create_event_handler("delete".to_string(), repository, payload, semaphore).await;
+            let payload = DeleteEventPayload::new(user_info, commit);
+            delete_event_handler(repository, payload, semaphore).await;
         }
         CommitEvent::Update {
             info: user_info,
             commit,
         } => {
             let payload = CreateEventPayload::new(user_info, commit);
-
+            
             create_event_handler("update".to_string(), repository, payload, semaphore).await;
         }
     }
