@@ -18,5 +18,6 @@ pub struct Events {
     pub event_id: Text,
     pub event_data: Frozen<Map<Text, Text>>,
     pub leveling_state: Leveling,
+    
     pub event_at: Timestamp,
 }

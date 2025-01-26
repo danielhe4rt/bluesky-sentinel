@@ -93,7 +93,7 @@ fn start_hydration(db_app: &Arc<Mutex<App>>, db: Arc<CachingSession>) {
             }
             // info!("Hydrated app with metrics and cluster data");
 
-            tokio::time::sleep(Duration::from_millis(50)).await;
+            tokio::time::sleep(Duration::from_millis(20)).await;
         }
     });
 }

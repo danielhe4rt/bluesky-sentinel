@@ -6,7 +6,6 @@ use crate::models::udts::leveling::Leveling;
 use charybdis::operations::{Find, Insert};
 use charybdis::scylla::CachingSession;
 use charybdis::types::Counter;
-use futures::TryStreamExt;
 use std::sync::Arc;
 
 pub struct CharacterRepository {

@@ -3,7 +3,7 @@ use crate::tui::components::driver_metrics::driver_metrics_widget;
 use crate::tui::components::event_logs_stream::event_logs_stream_view;
 use crate::tui::components::event_sparkline::event_sparkline_view;
 use crate::tui::components::event_types::event_types_view;
-use crate::tui::components::listening_events::listening_events_view;
+use crate::tui::components::select_events::listening_events_view;
 use ratatui::{
     layout::{Constraint, Layout, Rect},
     style::{Color, Modifier, Style},
@@ -61,7 +61,7 @@ fn draw_gauges(frame: &mut Frame, app: &App, area: Rect) {
 
 #[allow(clippy::too_many_lines)]
 fn draw_charts(frame: &mut Frame, app: &mut App, area: Rect) {
-    let constraints = vec![Constraint::Percentage(50), Constraint::Percentage(50)];
+    let constraints = vec![Constraint::Percentage(20), Constraint::Percentage(80)];
     let chunks = Layout::horizontal(constraints).split(area);
     let sidebar_view = chunks[0];
     let logs_view = chunks[1];
@@ -69,17 +69,11 @@ fn draw_charts(frame: &mut Frame, app: &mut App, area: Rect) {
         let events_view = Layout::vertical([Constraint::Percentage(100)]).split(sidebar_view);
         let events_view = events_view[0];
         {
-            let chunks =
-                Layout::horizontal([Constraint::Percentage(50), Constraint::Percentage(50)])
-                    .split(events_view);
+            let chunks = Layout::horizontal([Constraint::Percentage(100)]).split(events_view);
             let event_types = chunks[0];
-            let event_logs_view = chunks[1];
 
             let current_events = listening_events_view(app);
             frame.render_widget(current_events, event_types);
-
-            let logs = event_types_view(app);
-            frame.render_widget(logs, event_logs_view);
         }
     }
 
@@ -89,34 +83,38 @@ fn draw_charts(frame: &mut Frame, app: &mut App, area: Rect) {
 
 fn draw_text(frame: &mut Frame, area: Rect) {
     let text = vec![
-        text::Line::from("This is a paragraph with several lines. You can change style your text the way you want"),
-        text::Line::from(""),
         text::Line::from(vec![
-            Span::from("For example: "),
-            Span::styled("under", Style::default().fg(Color::Red)),
-            Span::raw(" "),
-            Span::styled("the", Style::default().fg(Color::Green)),
-            Span::raw(" "),
-            Span::styled("rainbow", Style::default().fg(Color::Blue)),
-            Span::raw("."),
+            Span::from("This is a "),
+            Span::styled("TUI", Style::default().fg(Color::Red)),
+            Span::raw(" + "),
+            Span::styled("ScyllaDB", Style::default().fg(Color::Cyan)),
+            Span::raw(" + "),
+            Span::styled("BlueSky", Style::default().fg(Color::Blue)),
+            Span::raw(" demo."),
         ]),
         text::Line::from(vec![
-            Span::raw("Oh and if you didn't "),
-            Span::styled("notice", Style::default().add_modifier(Modifier::ITALIC)),
-            Span::raw(" you can "),
-            Span::styled("automatically", Style::default().add_modifier(Modifier::BOLD)),
-            Span::raw(" "),
-            Span::styled("wrap", Style::default().add_modifier(Modifier::REVERSED)),
-            Span::raw(" your "),
-            Span::styled("text", Style::default().add_modifier(Modifier::UNDERLINED)),
-            Span::raw(".")
+            Span::raw(
+                "This project was done during my livecoding sessions, so don't forget to follow: ",
+            ),
+            Span::styled(
+                "https://twitch.tv/danielhe4rt",
+                Style::default()
+                    .add_modifier(Modifier::UNDERLINED)
+                    .fg(Color::Magenta),
+            ),
         ]),
-        text::Line::from(
-            "One more thing is that it should display unicode characters: 10€"
-        ),
+        text::Line::from(vec![
+            Span::raw("You can find the source available at: "),
+            Span::styled(
+                "https://github.com/danielhe4rt/bluesky-sentinel",
+                Style::default()
+                    .add_modifier(Modifier::UNDERLINED)
+                    .fg(Color::Blue),
+            ),
+        ]),
     ];
     let block = Block::bordered().title(Span::styled(
-        "Footer",
+        "About the Project",
         Style::default()
             .fg(Color::Magenta)
             .add_modifier(Modifier::BOLD),
@@ -127,7 +125,7 @@ fn draw_text(frame: &mut Frame, area: Rect) {
 
 fn draw_world_map_tab(frame: &mut Frame, app: &App, area: Rect) {
     let vertical_chunk =
-        Layout::vertical([Constraint::Min(10), Constraint::Percentage(90)]).split(area);
+        Layout::vertical([Constraint::Min(5), Constraint::Percentage(100)]).split(area);
 
     let chunks = Layout::horizontal([Constraint::Percentage(30), Constraint::Percentage(70)])
         .split(vertical_chunk[1]);
@@ -165,11 +163,11 @@ fn draw_world_map_tab(frame: &mut Frame, app: &App, area: Rect) {
         ],
     )
     .header(
-        Row::new(vec!["Cluster", "Location", "Address", "Status"])
+        Row::new(vec!["Node", "Location", "Address", "Status"])
             .style(Style::default().fg(Color::Yellow))
             .bottom_margin(1),
     )
-    .block(Block::bordered().title("Current Clusters"));
+    .block(Block::bordered().title("Connected Nodes"));
     frame.render_widget(table, chunks[0]);
 
     let map = Canvas::default()
@@ -194,7 +192,6 @@ fn draw_world_map_tab(frame: &mut Frame, app: &App, area: Rect) {
                 radius: 10.0,
                 color: Color::Green,
             });
-
 
             for (i, s1) in app.nodes.iter().enumerate() {
                 for s2 in &app.nodes[i + 1..] {

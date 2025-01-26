@@ -14,7 +14,6 @@ pub struct NewEventDTO {
     pub context: HashMap<String, String>,
 }
 
-
 impl From<&DeleteEventPayload> for NewEventDTO {
     fn from(payload: &DeleteEventPayload) -> Self {
         let context = HashMap::new();
@@ -68,13 +67,15 @@ impl From<&CreateEventPayload> for NewEventDTO {
                     ..Default::default()
                 }
             }
-            KnownRecord::AppBskyFeedLike(_) => NewEventDTO {
-                user_did: payload.event_info.did.to_string(),
-                posted_at: payload.event_info.time_us,
-                event_id: payload.commit_data.info.rkey.clone(),
-                event_type: AppBskyEventRecord::Like.to_string(),
-                context,
-                ..Default::default()
+            KnownRecord::AppBskyFeedLike(like) => {
+                NewEventDTO {
+                    user_did: payload.event_info.did.to_string(),
+                    posted_at: payload.event_info.time_us,
+                    event_id: payload.commit_data.info.rkey.clone(),
+                    event_type: AppBskyEventRecord::Like.to_string(),
+                    context,
+                    ..Default::default()
+                }
             },
             _ => NewEventDTO {
                 user_did: payload.event_info.did.to_string(),

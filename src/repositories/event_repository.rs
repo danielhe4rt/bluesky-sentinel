@@ -35,7 +35,7 @@ impl EventRepository {
             event_id: payload.event_id.to_string(),
             event_data: payload.context.clone(),
             leveling_state: Leveling::from(level_response),
-            event_at: Timestamp::from_timestamp_nanos(payload.posted_at as i64),
+            event_at: Utc::now(),
         };
 
         event

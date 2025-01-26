@@ -42,7 +42,6 @@ pub async fn start_jetstream(
         .await
         .expect("Failed to connect to Jetstream");
 
-    // info!("Starting Jetstream listener");
 
     let semaphore = Arc::new(Semaphore::new(settings.max_workers));
 
