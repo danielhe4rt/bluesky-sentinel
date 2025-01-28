@@ -99,6 +99,10 @@ trait CreateEventHandler {
             .increment_character_experience(character_experience, action_gained_experience as i64)
             .await;
 
+        repository
+            .event
+            .increment_event_count(payload.event_type.clone(), payload.commit_type.clone()).await;
+
         leveling_response_dto
     }
 

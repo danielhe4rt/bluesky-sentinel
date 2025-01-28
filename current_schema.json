@@ -1,38 +1,45 @@
 {
   "tables": {
-    "characters": {
+    "events_metrics": {
       "fields": [
         [
-          "leveling_state",
-          "leveling",
+          "created_count",
+          "counter",
           false
         ],
         [
-          "name",
+          "deleted_count",
+          "counter",
+          false
+        ],
+        [
+          "event_type",
           "text",
           false
         ],
         [
-          "user_did",
-          "text",
+          "updated_count",
+          "counter",
           false
         ]
       ],
       "field_names": [
-        "user_did",
-        "leveling_state",
-        "name"
+        "event_type",
+        "updated_count",
+        "created_count",
+        "deleted_count"
       ],
       "types_by_name": {
-        "user_did": "text",
-        "leveling_state": "leveling",
-        "name": "text"
+        "created_count": "counter",
+        "deleted_count": "counter",
+        "updated_count": "counter",
+        "event_type": "text"
       },
       "type_name": "",
       "table_name": "",
       "base_table": "",
       "partition_keys": [
-        "user_did"
+        "event_type"
       ],
       "clustering_keys": [],
       "static_columns": [],
@@ -54,12 +61,52 @@
         ]
       ],
       "field_names": [
-        "current_experience",
-        "user_did"
+        "user_did",
+        "current_experience"
       ],
       "types_by_name": {
+        "current_experience": "counter",
+        "user_did": "text"
+      },
+      "type_name": "",
+      "table_name": "",
+      "base_table": "",
+      "partition_keys": [
+        "user_did"
+      ],
+      "clustering_keys": [],
+      "static_columns": [],
+      "global_secondary_indexes": [],
+      "local_secondary_indexes": [],
+      "table_options": null
+    },
+    "characters": {
+      "fields": [
+        [
+          "leveling_state",
+          "leveling",
+          false
+        ],
+        [
+          "name",
+          "text",
+          false
+        ],
+        [
+          "user_did",
+          "text",
+          false
+        ]
+      ],
+      "field_names": [
+        "user_did",
+        "name",
+        "leveling_state"
+      ],
+      "types_by_name": {
+        "name": "text",
         "user_did": "text",
-        "current_experience": "counter"
+        "leveling_state": "leveling"
       },
       "type_name": "",
       "table_name": "",
@@ -117,24 +164,24 @@
         ]
       ],
       "field_names": [
-        "user_did",
         "event_at",
-        "event_data",
         "leveling_state",
-        "event_commit_type",
-        "event_id",
+        "event_data",
+        "bucket_id",
         "event_type",
-        "bucket_id"
+        "user_did",
+        "event_commit_type",
+        "event_id"
       ],
       "types_by_name": {
-        "leveling_state": "leveling",
-        "event_commit_type": "text",
-        "event_at": "timestamp",
-        "event_data": "frozen<map<text, text>>",
-        "event_id": "text",
         "user_did": "text",
-        "bucket_id": "timestamp",
-        "event_type": "text"
+        "event_data": "frozen<map<text, text>>",
+        "event_commit_type": "text",
+        "event_type": "text",
+        "event_at": "timestamp",
+        "event_id": "text",
+        "leveling_state": "leveling",
+        "bucket_id": "timestamp"
       },
       "type_name": "",
       "table_name": "",
@@ -182,18 +229,70 @@
         ]
       ],
       "field_names": [
-        "levels_gained",
-        "experience",
+        "level",
         "progress_percentage",
+        "experience",
         "experience_to_next_level",
-        "level"
+        "levels_gained"
       ],
       "types_by_name": {
+        "levels_gained": "int",
         "progress_percentage": "float",
         "level": "int",
+        "experience": "int",
+        "experience_to_next_level": "int"
+      },
+      "type_name": "",
+      "table_name": "",
+      "base_table": "",
+      "partition_keys": [],
+      "clustering_keys": [],
+      "static_columns": [],
+      "global_secondary_indexes": [],
+      "local_secondary_indexes": [],
+      "table_options": null
+    },
+    "bsky_user": {
+      "fields": [
+        [
+          "level",
+          "int",
+          false
+        ],
+        [
+          "experience",
+          "int",
+          false
+        ],
+        [
+          "experience_to_next_level",
+          "int",
+          false
+        ],
+        [
+          "levels_gained",
+          "int",
+          false
+        ],
+        [
+          "progress_percentage",
+          "float",
+          false
+        ]
+      ],
+      "field_names": [
+        "levels_gained",
+        "progress_percentage",
+        "experience",
+        "level",
+        "experience_to_next_level"
+      ],
+      "types_by_name": {
         "levels_gained": "int",
         "experience_to_next_level": "int",
-        "experience": "int"
+        "level": "int",
+        "experience": "int",
+        "progress_percentage": "float"
       },
       "type_name": "",
       "table_name": "",
@@ -251,24 +350,24 @@
         ]
       ],
       "field_names": [
-        "user_did",
-        "bucket_id",
+        "event_at",
         "event_type",
+        "event_data",
+        "leveling_state",
         "event_id",
         "event_commit_type",
-        "leveling_state",
-        "event_at",
-        "event_data"
+        "user_did",
+        "bucket_id"
       ],
       "types_by_name": {
-        "user_did": "text",
-        "event_commit_type": "text",
-        "leveling_state": "leveling",
-        "event_data": "frozen<map<text, text>>",
-        "event_at": "timestamp",
         "event_type": "text",
-        "event_id": "text",
-        "bucket_id": "timestamp"
+        "user_did": "text",
+        "bucket_id": "timestamp",
+        "event_commit_type": "text",
+        "event_data": "frozen<map<text, text>>",
+        "leveling_state": "leveling",
+        "event_at": "timestamp",
+        "event_id": "text"
       },
       "type_name": "",
       "table_name": "",

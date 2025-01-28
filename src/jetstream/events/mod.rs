@@ -83,8 +83,8 @@ pub async fn events_handler(
             commit,
         } => {
             let payload = CreateEventPayload::new(user_info, commit);
-            
             create_event_handler("update".to_string(), repository, payload, semaphore).await;
+            
         }
     }
 }

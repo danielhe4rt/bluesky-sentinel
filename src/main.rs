@@ -3,20 +3,17 @@
 use crate::args::AppSettings;
 use crate::database::create_caching_session;
 use crate::jetstream::start_jetstream;
-use crate::models::materialized_views::events_by_type::EventsByType;
 use crate::repositories::DatabaseRepository;
-use chrono::{Timelike, Utc};
 use ::crossterm::event::{KeyCode, KeyEventKind};
 
-use futures::TryStreamExt;
+use crate::tui::hydrate::start_hydration;
+
 use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
-use scylla::query::Query;
-use scylla::CachingSession;
 use std::sync::Arc;
-use std::{error::Error, io, time::Duration};
+use std::{error::Error, io};
 use tokio::sync::Mutex;
-use tui::app::{App, DeserializedNode};
+use tui::app::App;
 use tui::crossterm::Tui;
 use tui::event_handler::{Event, EventHandler};
 
@@ -48,54 +45,6 @@ async fn main() -> anyhow::Result<(), Box<dyn Error>> {
 
     start_terminal(&mut app).await?;
     Ok(())
-}
-
-fn start_hydration(db_app: &Arc<Mutex<App>>, db: Arc<CachingSession>) {
-    let app = Arc::clone(db_app);
-    let db = Arc::clone(&db);
-    tokio::spawn(async move {
-        loop {
-            let selected_item = {
-                let app = app.lock().await;
-                app.listened_events[app.selected_event].clone()
-            };
-
-            let current_timestamp = Utc::now()
-                .with_second(0)
-                .unwrap()
-                .with_nanosecond(0)
-                .unwrap();
-
-            let query = Query::new("SELECT * FROM events_by_type WHERE event_type = ? AND bucket_id = ? LIMIT 100");
-
-            let mut events_result = db
-                .execute_iter(query, (selected_item,current_timestamp))
-                .await
-                .unwrap()
-                .rows_stream::<EventsByType>()
-                .unwrap();
-
-            let mut events = vec![];
-            while let Some(event) = events_result.try_next().await.unwrap() {
-                events.push(event);
-            }
-
-            let db = db.get_session();
-            let metrics = db.get_metrics();
-            let cluster = db.get_cluster_data();
-
-            {
-                let mut app = app.lock().await;
-
-                app.recent_events = events;
-                app.metrics.update(metrics);
-                app.nodes = DeserializedNode::transform_nodes(cluster.get_nodes_info());
-            }
-            // info!("Hydrated app with metrics and cluster data");
-
-            tokio::time::sleep(Duration::from_millis(20)).await;
-        }
-    });
 }
 
 async fn start_terminal(app: &mut Arc<Mutex<App>>) -> Result<(), Box<dyn Error>> {

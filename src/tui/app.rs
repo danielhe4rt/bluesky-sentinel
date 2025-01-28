@@ -2,7 +2,9 @@ use crate::args::AppSettings;
 use scylla::transport::Node;
 use scylla::Metrics;
 use std::sync::Arc;
+use charybdis::types::Counter;
 use tokio::sync::Mutex;
+use crate::models::events_metrics::EventsMetrics;
 use crate::models::materialized_views::events_by_type::EventsByType;
 
 pub struct TabsState {
@@ -93,7 +95,7 @@ pub struct App {
     pub title: String,
     pub should_quit: bool,
     pub tabs: TabsState,
-    pub listened_events: Vec<String>,
+    pub listened_events: Vec<EventsMetrics>,
     pub recent_events: Vec<EventsByType>,
     pub nodes: Vec<DeserializedNode>,
     pub enhanced_graphics: bool,
@@ -110,7 +112,12 @@ impl App {
             title: app_settings.app_name,
             should_quit: false,
             tabs: TabsState::new(vec!["Events".to_string(), "Connected Nodes".to_string()]),
-            listened_events: app_settings.bsky_topics,
+            listened_events: vec![EventsMetrics{
+                event_type: "Event".to_string(),
+                created_count: None,
+                updated_count: None,
+                deleted_count: None,
+            }],
             selected_event: 0,
             recent_events: vec![EventsByType::default(); 5],
             nodes: vec![DeserializedNode::default(); 10],

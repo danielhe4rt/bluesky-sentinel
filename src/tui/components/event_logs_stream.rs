@@ -18,7 +18,7 @@ pub fn event_logs_stream_view(app: &App) -> List {
 
             let content = vec![text::Line::from(vec![
                 Span::styled(format!("[ {ts:<9}]"), info_style),
-                Span::raw(output),
+                Span::from(format!("{:.150}", output.trim().trim_ascii())),
             ])];
             ListItem::new(content)
         })
