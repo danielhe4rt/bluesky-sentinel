@@ -11,6 +11,7 @@ pub async fn create_session() -> Result<GenericSession<CurrentDeserializationApi
         .await?;
 
     session.use_keyspace("bsky_rpg", true).await?;
+    // session.await_schema_agreement().await?;
 
     Ok(session)
 }

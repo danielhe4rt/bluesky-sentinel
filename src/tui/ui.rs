@@ -1,9 +1,9 @@
-use crate::tui::app::App;
+use crate::tui::app::{App, DeserializedNode};
 use crate::tui::components::driver_metrics::driver_metrics_widget;
 use crate::tui::components::event_logs_stream::event_logs_stream_view;
 use crate::tui::components::event_sparkline::event_sparkline_view;
-use crate::tui::components::event_types::event_types_view;
 use crate::tui::components::select_events::listening_events_view;
+use itertools::Itertools;
 use ratatui::{
     layout::{Constraint, Layout, Rect},
     style::{Color, Modifier, Style},
@@ -15,6 +15,7 @@ use ratatui::{
     },
     Frame,
 };
+use crate::tui::components::world_map::draw_map;
 
 pub fn draw(frame: &mut Frame, app: &mut App) {
     let chunks = Layout::vertical([Constraint::Length(3), Constraint::Min(0)]).split(frame.area());
@@ -134,20 +135,29 @@ fn draw_world_map_tab(frame: &mut Frame, app: &App, area: Rect) {
         .fg(Color::Red)
         .add_modifier(Modifier::RAPID_BLINK | Modifier::CROSSED_OUT);
 
-    let rows = app.nodes.iter().map(|s| {
-        let style = if s.status == "Up" {
-            up_style
-        } else {
-            failure_style
-        };
-        Row::new(vec![
-            s.name.as_str(),
-            s.datacenter.as_str(),
-            s.address.as_str(),
-            s.status.as_str(),
-        ])
-        .style(style)
-    });
+    let nodes = app
+        .cluster_regions
+        .iter()
+        .flat_map(|(k, v)| v.nodes.clone())
+        .sorted_by_key(|node| node.datacenter.clone())
+        .collect::<Vec<DeserializedNode>>();
+
+    let rows = nodes
+        .iter()
+        .map(|node| {
+            let status = match node.is_running {
+                true => ("Up", up_style),
+                false => ("Down", failure_style),
+            };
+            Row::new(vec![
+                node.name.as_str(),
+                node.datacenter.as_str(),
+                node.address.as_str(),
+                status.0,
+            ])
+            .style(status.1)
+        })
+        .collect::<Vec<Row>>();
 
     let driver_metrics_table = driver_metrics_widget(app);
 
@@ -172,51 +182,7 @@ fn draw_world_map_tab(frame: &mut Frame, app: &App, area: Rect) {
 
     let map = Canvas::default()
         .block(Block::bordered().title("World"))
-        .paint(|ctx| {
-            ctx.draw(&Map {
-                color: Color::White,
-                resolution: MapResolution::High,
-            });
-            ctx.layer();
-
-            ctx.draw(&Circle {
-                x: app.nodes[0].coords.1,
-                y: app.nodes[0].coords.0,
-                radius: 10.0,
-                color: Color::Green,
-            });
-
-            ctx.draw(&Circle {
-                x: app.nodes[2].coords.1,
-                y: app.nodes[2].coords.0,
-                radius: 10.0,
-                color: Color::Green,
-            });
-
-            for (i, s1) in app.nodes.iter().enumerate() {
-                for s2 in &app.nodes[i + 1..] {
-                    ctx.draw(&canvas::Line {
-                        x1: s1.coords.1,
-                        y1: s1.coords.0,
-                        y2: s2.coords.0,
-                        x2: s2.coords.1,
-                        color: Color::Yellow,
-                    });
-                }
-            }
-            for server in &app.nodes {
-                let color = if server.status == "Up" {
-                    Color::Green
-                } else {
-                    Color::Red
-                };
-                ctx.print(
-                    server.coords.1,
-                    server.coords.0,
-                    Span::styled("X", Style::default().fg(color)),
-                );
-            }
-        })
+        .paint(|ctx| draw_map(ctx, app))
         .marker(if app.enhanced_graphics {
             symbols::Marker::Braille
         } else {

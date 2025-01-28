@@ -1,52 +1,5 @@
 {
   "tables": {
-    "events_metrics": {
-      "fields": [
-        [
-          "created_count",
-          "counter",
-          false
-        ],
-        [
-          "deleted_count",
-          "counter",
-          false
-        ],
-        [
-          "event_type",
-          "text",
-          false
-        ],
-        [
-          "updated_count",
-          "counter",
-          false
-        ]
-      ],
-      "field_names": [
-        "event_type",
-        "updated_count",
-        "created_count",
-        "deleted_count"
-      ],
-      "types_by_name": {
-        "created_count": "counter",
-        "deleted_count": "counter",
-        "updated_count": "counter",
-        "event_type": "text"
-      },
-      "type_name": "",
-      "table_name": "",
-      "base_table": "",
-      "partition_keys": [
-        "event_type"
-      ],
-      "clustering_keys": [],
-      "static_columns": [],
-      "global_secondary_indexes": [],
-      "local_secondary_indexes": [],
-      "table_options": null
-    },
     "characters_experience": {
       "fields": [
         [
@@ -99,13 +52,13 @@
         ]
       ],
       "field_names": [
-        "user_did",
+        "leveling_state",
         "name",
-        "leveling_state"
+        "user_did"
       ],
       "types_by_name": {
-        "name": "text",
         "user_did": "text",
+        "name": "text",
         "leveling_state": "leveling"
       },
       "type_name": "",
@@ -164,24 +117,24 @@
         ]
       ],
       "field_names": [
-        "event_at",
-        "leveling_state",
-        "event_data",
-        "bucket_id",
+        "event_id",
         "event_type",
         "user_did",
         "event_commit_type",
-        "event_id"
+        "bucket_id",
+        "event_data",
+        "event_at",
+        "leveling_state"
       ],
       "types_by_name": {
-        "user_did": "text",
-        "event_data": "frozen<map<text, text>>",
-        "event_commit_type": "text",
-        "event_type": "text",
         "event_at": "timestamp",
         "event_id": "text",
         "leveling_state": "leveling",
-        "bucket_id": "timestamp"
+        "user_did": "text",
+        "bucket_id": "timestamp",
+        "event_data": "frozen<map<text, text>>",
+        "event_commit_type": "text",
+        "event_type": "text"
       },
       "type_name": "",
       "table_name": "",
@@ -197,61 +150,56 @@
       "global_secondary_indexes": [],
       "local_secondary_indexes": [],
       "table_options": null
-    }
-  },
-  "udts": {
-    "leveling": {
+    },
+    "events_metrics": {
       "fields": [
         [
-          "level",
-          "int",
+          "created_count",
+          "counter",
           false
         ],
         [
-          "experience",
-          "int",
+          "deleted_count",
+          "counter",
           false
         ],
         [
-          "experience_to_next_level",
-          "int",
+          "event_type",
+          "text",
           false
         ],
         [
-          "levels_gained",
-          "int",
-          false
-        ],
-        [
-          "progress_percentage",
-          "float",
+          "updated_count",
+          "counter",
           false
         ]
       ],
       "field_names": [
-        "level",
-        "progress_percentage",
-        "experience",
-        "experience_to_next_level",
-        "levels_gained"
+        "event_type",
+        "created_count",
+        "updated_count",
+        "deleted_count"
       ],
       "types_by_name": {
-        "levels_gained": "int",
-        "progress_percentage": "float",
-        "level": "int",
-        "experience": "int",
-        "experience_to_next_level": "int"
+        "deleted_count": "counter",
+        "updated_count": "counter",
+        "event_type": "text",
+        "created_count": "counter"
       },
       "type_name": "",
       "table_name": "",
       "base_table": "",
-      "partition_keys": [],
+      "partition_keys": [
+        "event_type"
+      ],
       "clustering_keys": [],
       "static_columns": [],
       "global_secondary_indexes": [],
       "local_secondary_indexes": [],
       "table_options": null
-    },
+    }
+  },
+  "udts": {
     "bsky_user": {
       "fields": [
         [
@@ -281,18 +229,70 @@
         ]
       ],
       "field_names": [
-        "levels_gained",
-        "progress_percentage",
-        "experience",
         "level",
-        "experience_to_next_level"
+        "experience",
+        "experience_to_next_level",
+        "progress_percentage",
+        "levels_gained"
       ],
       "types_by_name": {
-        "levels_gained": "int",
         "experience_to_next_level": "int",
         "level": "int",
         "experience": "int",
+        "levels_gained": "int",
         "progress_percentage": "float"
+      },
+      "type_name": "",
+      "table_name": "",
+      "base_table": "",
+      "partition_keys": [],
+      "clustering_keys": [],
+      "static_columns": [],
+      "global_secondary_indexes": [],
+      "local_secondary_indexes": [],
+      "table_options": null
+    },
+    "leveling": {
+      "fields": [
+        [
+          "level",
+          "int",
+          false
+        ],
+        [
+          "experience",
+          "int",
+          false
+        ],
+        [
+          "experience_to_next_level",
+          "int",
+          false
+        ],
+        [
+          "levels_gained",
+          "int",
+          false
+        ],
+        [
+          "progress_percentage",
+          "float",
+          false
+        ]
+      ],
+      "field_names": [
+        "levels_gained",
+        "experience_to_next_level",
+        "experience",
+        "progress_percentage",
+        "level"
+      ],
+      "types_by_name": {
+        "experience": "int",
+        "levels_gained": "int",
+        "level": "int",
+        "progress_percentage": "float",
+        "experience_to_next_level": "int"
       },
       "type_name": "",
       "table_name": "",
@@ -351,23 +351,23 @@
       ],
       "field_names": [
         "event_at",
-        "event_type",
-        "event_data",
-        "leveling_state",
+        "bucket_id",
+        "user_did",
         "event_id",
         "event_commit_type",
-        "user_did",
-        "bucket_id"
+        "event_data",
+        "leveling_state",
+        "event_type"
       ],
       "types_by_name": {
-        "event_type": "text",
         "user_did": "text",
-        "bucket_id": "timestamp",
         "event_commit_type": "text",
-        "event_data": "frozen<map<text, text>>",
+        "bucket_id": "timestamp",
         "leveling_state": "leveling",
-        "event_at": "timestamp",
-        "event_id": "text"
+        "event_type": "text",
+        "event_data": "frozen<map<text, text>>",
+        "event_id": "text",
+        "event_at": "timestamp"
       },
       "type_name": "",
       "table_name": "",

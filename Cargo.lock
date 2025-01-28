@@ -275,6 +275,7 @@ dependencies = [
  "dotenvy",
  "env_logger",
  "futures",
+ "itertools 0.14.0",
  "jetstream-oxide",
  "paris",
  "rand",
@@ -1284,6 +1285,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "itertools"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285"
+dependencies = [
+ "either",
+]
+
+[[package]]
 name = "itoa"
 version = "1.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1740,7 +1750,7 @@ dependencies = [
  "crossterm",
  "indoc",
  "instability",
- "itertools",
+ "itertools 0.13.0",
  "lru",
  "paste",
  "strum",
@@ -1914,7 +1924,7 @@ dependencies = [
  "futures",
  "hashbrown 0.14.5",
  "histogram",
- "itertools",
+ "itertools 0.13.0",
  "lazy_static",
  "lz4_flex",
  "openssl",
@@ -2523,7 +2533,7 @@ version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b3644627a5af5fa321c95b9b235a72fd24cd29c648c2c379431e6628655627bf"
 dependencies = [
- "itertools",
+ "itertools 0.13.0",
  "unicode-segmentation",
  "unicode-width 0.1.14",
 ]

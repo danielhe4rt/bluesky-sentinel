@@ -49,9 +49,10 @@ async fn hydrate_driver_data(app: &Arc<Mutex<App>>, db: &Arc<CachingSession>) {
     let db = db.get_session();
     let metrics = db.get_metrics();
     let cluster = db.get_cluster_data();
+    db.refresh_metadata().await.unwrap();
 
     app.metrics.update(metrics);
-    app.nodes = DeserializedNode::transform_nodes(cluster.get_nodes_info());
+    app.cluster_regions = DeserializedNode::transform_nodes(cluster.get_nodes_info());
 }
 
 async fn hydrate_events_stream(app: &Arc<Mutex<App>>, db: &Arc<CachingSession>) {

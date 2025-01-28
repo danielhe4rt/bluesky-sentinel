@@ -1,11 +1,12 @@
 use crate::args::AppSettings;
-use scylla::transport::Node;
-use scylla::Metrics;
-use std::sync::Arc;
-use charybdis::types::Counter;
-use tokio::sync::Mutex;
 use crate::models::events_metrics::EventsMetrics;
 use crate::models::materialized_views::events_by_type::EventsByType;
+use itertools::Itertools;
+use scylla::transport::Node;
+use scylla::Metrics;
+use std::collections::HashMap;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 pub struct TabsState {
     pub titles: Vec<String>,
@@ -53,30 +54,37 @@ impl DriverMetrics {
 }
 
 #[derive(Debug, Default, Clone)]
+pub struct ClusterRegion {
+    pub name: String,                 // SA-DC, EU-DC, US-DC
+    pub coords: (f64, f64),           // Base Coords
+    pub nodes: Vec<DeserializedNode>, // Node should have a gap on them while drawing and needs to be symmetric.
+}
+
+#[derive(Debug, Default, Clone)]
 pub struct DeserializedNode {
     pub name: String,
     pub datacenter: String,
     pub coords: (f64, f64),
     pub address: String,
-    pub status: String,
+    pub is_running: bool,
 }
 
 impl DeserializedNode {
-    pub fn transform_nodes(current_nodes: &[Arc<Node>]) -> Vec<DeserializedNode> {
-        current_nodes
+    pub fn transform_nodes(current_nodes: &[Arc<Node>]) -> HashMap<String, ClusterRegion> {
+        let mut cluster_regions: HashMap<String, ClusterRegion> = HashMap::new();
+
+        let nodes: Vec<DeserializedNode> = current_nodes
             .iter()
             .map(move |node| {
                 let datacenter = node.datacenter.clone().unwrap();
                 let name = node.host_id.clone().to_string();
                 let address = node.address.to_string();
+                let is_running = node.sharder().is_some();
                 let coords = match datacenter.as_str() {
                     "SA-DC" => (-23.5505, -46.6333),
                     "EU-DC" => (52.5200, 13.4050),
+                    "US-DC" => (37.7749, -122.4194),
                     _ => (0.0, 0.0),
-                };
-                let status = match !node.is_down() {
-                    true => "Up",
-                    false => "Down",
                 };
 
                 DeserializedNode {
@@ -84,10 +92,39 @@ impl DeserializedNode {
                     datacenter,
                     coords,
                     address,
-                    status: status.to_string(),
+                    is_running,
                 }
             })
-            .collect()
+            .collect();
+
+        for node in nodes {
+
+            let region = cluster_regions.get_mut(&node.datacenter);
+            match region {
+                Some(region) => {
+                    region.nodes.push(node);
+                }
+                None => {
+                    let coords = match node.datacenter.as_str() {
+                        "SA-DC" => (-23.5505, -46.6333),
+                        "EU-DC" => (52.5200, 13.4050),
+                        "US-DC" => (37.7749, -122.4194),
+                        _ => (0.0, 0.0),
+                    };
+
+                    cluster_regions.insert(
+                        node.datacenter.clone(),
+                        ClusterRegion {
+                            name: node.datacenter.clone(),
+                            coords,
+                            nodes: vec![node],
+                        },
+                    );
+                }
+            }
+        }
+
+        cluster_regions
     }
 }
 
@@ -97,10 +134,11 @@ pub struct App {
     pub tabs: TabsState,
     pub listened_events: Vec<EventsMetrics>,
     pub recent_events: Vec<EventsByType>,
-    pub nodes: Vec<DeserializedNode>,
+    pub cluster_regions: HashMap<String, ClusterRegion>,
     pub enhanced_graphics: bool,
     pub metrics: DriverMetrics,
     pub selected_event: usize,
+    pub fps: f64,
 }
 
 impl App {
@@ -112,7 +150,7 @@ impl App {
             title: app_settings.app_name,
             should_quit: false,
             tabs: TabsState::new(vec!["Events".to_string(), "Connected Nodes".to_string()]),
-            listened_events: vec![EventsMetrics{
+            listened_events: vec![EventsMetrics {
                 event_type: "Event".to_string(),
                 created_count: None,
                 updated_count: None,
@@ -120,8 +158,9 @@ impl App {
             }],
             selected_event: 0,
             recent_events: vec![EventsByType::default(); 5],
-            nodes: vec![DeserializedNode::default(); 10],
+            cluster_regions: HashMap::new(),
             enhanced_graphics: true,
+            fps: 60.0,
         };
 
         Arc::new(Mutex::new(app))

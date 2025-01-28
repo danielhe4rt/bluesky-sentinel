@@ -1,7 +1,7 @@
 #![feature(iterator_try_collect)]
 
 use crate::args::AppSettings;
-use crate::database::create_caching_session;
+use crate::database::{create_caching_session, create_session};
 use crate::jetstream::start_jetstream;
 use crate::repositories::DatabaseRepository;
 use ::crossterm::event::{KeyCode, KeyEventKind};
@@ -16,6 +16,7 @@ use tokio::sync::Mutex;
 use tui::app::App;
 use tui::crossterm::Tui;
 use tui::event_handler::{Event, EventHandler};
+use crate::tui::app::DeserializedNode;
 
 mod args;
 mod database;
@@ -50,7 +51,7 @@ async fn main() -> anyhow::Result<(), Box<dyn Error>> {
 async fn start_terminal(app: &mut Arc<Mutex<App>>) -> Result<(), Box<dyn Error>> {
     let backend = CrosstermBackend::new(io::stdout());
     let terminal = Terminal::new(backend)?;
-    let events = EventHandler::new(50);
+    let events = EventHandler::new(100);
     let mut tui = Tui::new(terminal, events);
 
     tui.init()?;
