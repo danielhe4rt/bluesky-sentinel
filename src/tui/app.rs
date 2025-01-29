@@ -1,10 +1,10 @@
 use crate::args::AppSettings;
 use crate::models::events_metrics::EventsMetrics;
 use crate::models::materialized_views::events_by_type::EventsByType;
-use itertools::Itertools;
 use scylla::transport::Node;
 use scylla::Metrics;
 use std::collections::HashMap;
+use std::ops::Add;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -58,7 +58,34 @@ pub struct ClusterRegion {
     pub name: String,                 // SA-DC, EU-DC, US-DC
     pub coords: (f64, f64),           // Base Coords
     pub nodes: Vec<DeserializedNode>, // Node should have a gap on them while drawing and needs to be symmetric.
+    pub region_status: bool,
+    pub nodes_count: usize,
+    pub nodes_down: usize,
 }
+
+impl ClusterRegion {
+    /// Checks if the region is fully operating (no nodes down).
+    pub fn is_fully_operating(&self) -> bool {
+        self.nodes_down == 0
+    }
+
+    /// Checks if the region is operating with quorum (more than half of nodes are up).
+    pub fn is_quorum(&self) -> bool {
+        let quorum = (self.nodes_count / 2) + 1;
+        self.nodes_down < (self.nodes_count - quorum)
+    }
+
+    /// Checks if the region is operating with a minimum number of nodes (at least one node up).
+    pub fn is_operating_with_minimum(&self) -> bool {
+        self.nodes_down < self.nodes_count
+    }
+
+    /// Checks if the region is completely down (all nodes are down).
+    pub fn is_down(&self) -> bool {
+        self.nodes_down == self.nodes_count
+    }
+}
+
 
 #[derive(Debug, Default, Clone)]
 pub struct DeserializedNode {
@@ -98,11 +125,14 @@ impl DeserializedNode {
             .collect();
 
         for node in nodes {
-
             let region = cluster_regions.get_mut(&node.datacenter);
             match region {
                 Some(region) => {
-                    region.nodes.push(node);
+                    region.nodes.push(node.clone());
+                    region.nodes_count += 1;
+                    if !node.is_running {
+                        region.nodes_down += 1;
+                    }
                 }
                 None => {
                     let coords = match node.datacenter.as_str() {
@@ -112,12 +142,17 @@ impl DeserializedNode {
                         _ => (0.0, 0.0),
                     };
 
+                    let nodes_down = if node.is_running { 0 } else { 1 };
+
                     cluster_regions.insert(
                         node.datacenter.clone(),
                         ClusterRegion {
                             name: node.datacenter.clone(),
                             coords,
                             nodes: vec![node],
+                            region_status: true,
+                            nodes_count: 1,
+                            nodes_down,
                         },
                     );
                 }

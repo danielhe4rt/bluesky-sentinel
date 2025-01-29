@@ -18,20 +18,20 @@ pub fn draw_map(ctx: &mut Context, app: &App) {
         .into_iter()
         .sorted_by_key(|(k, v)| k.clone());
 
-    for (i, cluster_region) in current_clusters.enumerate() {
+
+
+    for (_, cluster_region) in current_clusters.enumerate() {
         // Draw the Region Circles
         let current_cluster = cluster_region.1;
-
 
         // Draw the Lines
         draw_streaming_flow(ctx, app, &current_cluster);
         draw_datacenters_line(ctx, app, &current_cluster);
-        draw_cluster_circle(ctx, &current_cluster);
+
 
         // Draw the Nodes
         draw_nodes(ctx, &current_cluster);
-
-
+        draw_cluster_circle(ctx, &current_cluster);
 
         ctx.layer();
     }
@@ -81,10 +81,9 @@ fn draw_streaming_flow(ctx: &mut Context, app: &App, current_cluster: &ClusterRe
 
 fn draw_nodes(ctx: &mut Context, current_cluster: &ClusterRegion) {
     let gap_coordinates = vec![
-        (2.0, 2.0),   // Diagonal top-right
-        (-2.0, 2.0),  // Diagonal bottom-right
-        (-2.0, -2.0), // Diagonal bottom-left
-        (2.0, -2.0),  // Diagonal top-left
+        (5.0, 0.0),   // Diagonal top-right
+        (-7.0, 7.0),  // Diagonal bottom-right
+        (-7.0, -7.0), // Diagonal bottom-left
     ];
 
     for (node_index, node) in current_cluster.nodes.iter().enumerate() {
@@ -92,16 +91,16 @@ fn draw_nodes(ctx: &mut Context, current_cluster: &ClusterRegion) {
         let (lat_offset, lon_offset) = gap_coordinates[offset_index];
 
         // Calculate the node's new position with the gap
-        let node_lat = current_cluster.coords.0 + lat_offset * 0.5; // Adjust scale as needed
-        let node_lon = current_cluster.coords.1 + lon_offset * 0.5;
+        let node_lat = current_cluster.coords.0 + lat_offset * 1.1; // Adjust scale as needed
+        let node_lon = current_cluster.coords.1 + lon_offset * 1.1;
 
         let node_style = if node.is_running {
-            Style::default().fg(Color::Green)
+            Style::default().fg(Color::LightCyan)
         } else {
             Style::default().fg(Color::Red)
         };
 
-        ctx.print(node_lon, node_lat, Span::styled("X", node_style));
+        ctx.print(node_lon, node_lat, Span::styled(node_index.to_string(), node_style));
     }
 }
 
@@ -121,10 +120,29 @@ fn draw_datacenters_line(ctx: &mut Context, app: &App, current_cluster: &Cluster
 }
 
 fn draw_cluster_circle(ctx: &mut Context, current_cluster: &ClusterRegion) {
+
+    let cluster_style = if current_cluster.is_fully_operating() {
+        Color::Green
+    } else if current_cluster.is_quorum() {
+        Color::Blue
+    } else if current_cluster.is_operating_with_minimum() {
+        Color::Yellow
+    } else {
+        Color::Red
+    };
+
+
     ctx.draw(&Circle {
         x: current_cluster.coords.1,
         y: current_cluster.coords.0,
-        radius: 10.0,
-        color: Color::Green,
+        radius: 12.0,
+        color: cluster_style,
     });
+    
+    ctx.print(
+        current_cluster.coords.1 - 2.0,
+        current_cluster.coords.0 - 3.0,
+        Span::styled(current_cluster.name.clone(), cluster_style),
+    );
+    
 }
