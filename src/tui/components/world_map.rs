@@ -52,6 +52,10 @@ fn draw_streaming_flow(ctx: &mut Context, app: &App, current_cluster: &ClusterRe
             continue;
         }
 
+        if target_region.is_down() || current_cluster.is_down() {
+            continue;
+        }
+
         // Calculate the difference in coordinates
         let dx = target_region.coords.1 - current_cluster.coords.1;
         let dy = target_region.coords.0 - current_cluster.coords.0;
@@ -105,13 +109,18 @@ fn draw_nodes(ctx: &mut Context, current_cluster: &ClusterRegion) {
 }
 
 fn draw_datacenters_line(ctx: &mut Context, app: &App, current_cluster: &ClusterRegion) {
-    for s2 in app.cluster_regions.iter().enumerate() {
-        let s2 = s2.1 .1;
+    for (i, target_region) in app.cluster_regions.iter().enumerate() {
+        let target_region = target_region.1;
+
+        if target_region.is_down() || current_cluster.is_down() {
+            continue;
+        }
+
         ctx.draw(&canvas::Line {
             x1: current_cluster.coords.1,
             y1: current_cluster.coords.0,
-            y2: s2.coords.0,
-            x2: s2.coords.1,
+            y2: target_region.coords.0,
+            x2: target_region.coords.1,
             color: Color::Yellow,
         });
 
@@ -138,11 +147,11 @@ fn draw_cluster_circle(ctx: &mut Context, current_cluster: &ClusterRegion) {
         radius: 12.0,
         color: cluster_style,
     });
-    
+
     ctx.print(
         current_cluster.coords.1 - 2.0,
         current_cluster.coords.0 - 3.0,
         Span::styled(current_cluster.name.clone(), cluster_style),
     );
-    
+
 }
