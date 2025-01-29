@@ -29,7 +29,7 @@ mod tui;
 async fn main() -> anyhow::Result<(), Box<dyn Error>> {
     let app_settings = AppSettings::new();
 
-    let session = create_caching_session().await?;
+    let session = create_caching_session(&app_settings).await?;
 
     let app_session = Arc::clone(&session);
     let hydration_session = Arc::clone(&session);
