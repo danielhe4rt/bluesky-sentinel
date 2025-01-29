@@ -13,6 +13,7 @@ use ratatui::Terminal;
 use std::sync::Arc;
 use std::{error::Error, io};
 use tokio::sync::Mutex;
+use tokio::time::sleep;
 use tui::app::App;
 use tui::crossterm::Tui;
 use tui::event_handler::{Event, EventHandler};
@@ -41,6 +42,8 @@ async fn main() -> anyhow::Result<(), Box<dyn Error>> {
     tokio::spawn(async move {
         let _ = start_jetstream(app_settings, &repository).await;
     });
+    
+    sleep(std::time::Duration::from_secs(1)).await;
 
     start_hydration(&mut app, hydration_session);
 
