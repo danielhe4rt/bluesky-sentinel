@@ -94,6 +94,7 @@ pub struct DeserializedNode {
     pub coords: (f64, f64),
     pub address: String,
     pub is_running: bool,
+    pub shards_count: String,
 }
 
 impl DeserializedNode {
@@ -114,9 +115,15 @@ impl DeserializedNode {
                     "datacenter1" => (-23.5505, -46.6333),
                     _ => (0.0, 0.0),
                 };
+                let shards_count = if let Some(sharder) = node.sharder() {
+                    sharder.nr_shards.get().to_string()
+                } else {
+                    "0".to_string()
+                };
 
                 DeserializedNode {
                     name,
+                    shards_count,
                     datacenter,
                     coords,
                     address,

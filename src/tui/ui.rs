@@ -1,3 +1,4 @@
+use std::ops::Deref;
 use crate::tui::app::{App, DeserializedNode};
 use crate::tui::components::driver_metrics::driver_metrics_widget;
 use crate::tui::components::event_logs_stream::event_logs_stream_view;
@@ -149,10 +150,12 @@ fn draw_world_map_tab(frame: &mut Frame, app: &App, area: Rect) {
                 true => ("Up", up_style),
                 false => ("Down", failure_style),
             };
+
             Row::new(vec![
                 node.name.as_str(),
                 node.datacenter.as_str(),
                 node.address.as_str(),
+                node.shards_count.as_str(),
                 status.0,
             ])
             .style(status.1)
@@ -166,14 +169,15 @@ fn draw_world_map_tab(frame: &mut Frame, app: &App, area: Rect) {
     let table = Table::new(
         rows,
         [
-            Constraint::Length(15),
-            Constraint::Length(15),
-            Constraint::Length(15),
-            Constraint::Length(15),
+            Constraint::Ratio(1,5),
+            Constraint::Ratio(1,5),
+            Constraint::Ratio(1,5),
+            Constraint::Ratio(1,5),
+            Constraint::Ratio(1,5),
         ],
     )
     .header(
-        Row::new(vec!["Node", "Location", "Address", "Status"])
+        Row::new(vec!["Node", "Location", "Address", "Nø Shards", "Status"])
             .style(Style::default().fg(Color::Yellow))
             .bottom_margin(1),
     )
